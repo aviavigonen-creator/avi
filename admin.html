@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ניהול · מנות של פורים</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f6f3f7;--surface:#fff;--ink:#241522;--muted:#6e5868;--line:#e5dbe3;--wine:#7a1846;--gold:#c9932b;--ok:#1f7a5c;--warn:#b8860b;--bad:#b3261e;--blue:#1559c9}
+@media (prefers-color-scheme:dark){:root{--bg:#17101a;--surface:#221723;--ink:#f3e9f0;--muted:#b9a5b3;--line:#3a2a38;--wine:#d9568f;--ok:#5cc79e;--warn:#e3b252;--bad:#ff7b72;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Assistant,"Segoe UI",Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.2}
+.top{background:var(--wine);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 16px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.top h1{font-size:1.1rem}.top .sp{flex:1}
+.top a,.top button{color:#fff;background:rgba(255,255,255,.15);border:0;border-radius:8px;padding:6px 12px;text-decoration:none;font-weight:600;cursor:pointer}
+.tabs{display:flex;gap:4px;padding:10px 16px 0;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--wine);border-color:var(--wine)}
+main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
+.panel{display:none}.panel.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat small{color:var(--muted);display:block}.stat b{font-size:1.7rem;font-variant-numeric:tabular-nums}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.box h2{font-size:1.1rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tbl{overflow-x:auto}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:.8rem;color:var(--muted)}
+tr:hover td{background:color-mix(in srgb,var(--line) 35%,transparent)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.s-new{background:#e8f0fe;color:#1a56c9}.s-awaiting_payment{background:#fff4d6;color:#8a6500}.s-paid_pending{background:#fff0c2;color:#7a5a00}.s-paid{background:#dff5ea;color:#116645}.s-preparing{background:#efe3ff;color:#5b2d99}.s-delivered{background:#e6e6e6;color:#444}.s-cancelled{background:#fde2e0;color:#9a1c14}
+@media (prefers-color-scheme:dark){.pill{filter:brightness(.85) saturate(1.2)}}
+.btn{background:var(--wine);color:#fff;border:0;border-radius:9px;padding:8px 14px;font-weight:700;cursor:pointer}
+.btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--line)}.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}.btn.sm{padding:5px 10px;font-size:.85rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
+label{display:grid;gap:4px;font-weight:600;font-size:.9rem}
+.form{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.form .full{grid-column:1/-1}
+.chk{display:flex;align-items:center;gap:8px;font-weight:600}.chk input{width:auto}
+.bars{display:flex;align-items:flex-end;gap:3px;height:120px;padding-top:10px}
+.bars div{flex:1;background:var(--wine);border-radius:3px 3px 0 0;position:relative;min-width:6px}
+.bars div i{position:absolute;bottom:0;left:0;right:0;background:var(--gold);border-radius:3px 3px 0 0}
+.bars div span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:.7rem;color:var(--muted)}
+.legend{font-size:.8rem;color:var(--muted);display:flex;gap:14px;margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline-start:4px}
+.login{max-width:380px;margin:60px auto;display:grid;gap:12px}
+.err{color:var(--bad);font-weight:600}.okmsg{color:var(--ok);font-weight:600}
+.drawer{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;justify-content:flex-start}
+.drawer .in{background:var(--bg);width:min(560px,100%);height:100%;overflow-y:auto;padding:18px;display:grid;gap:12px;align-content:start}
+.thumb{width:56px;height:56px;object-fit:contain;background:#eee;border-radius:8px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;z-index:50}
+.setup{max-width:720px;margin:40px auto;display:grid;gap:14px}
+.setup ol{padding-right:20px;line-height:1.8}
+code{background:color-mix(in srgb,var(--line) 60%,transparent);padding:2px 6px;border-radius:5px;direction:ltr;unicode-bidi:embed}
+pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(--muted)}
+[hidden]{display:none!important}
+.muted{color:var(--muted)}
+.dir{direction:ltr;text-align:left}
+</style>
+</head>
+<body>
+
+<div id="setup" class="setup" hidden>
+  <h1>פאנל הניהול עדיין לא מחובר למסד הנתונים</h1>
+  <p>כדי שההזמנות, המוצרים והסטטיסטיקות יעבדו, צריך לחבר את האתר ל-Supabase (מסד נתונים חינמי). זה נעשה פעם אחת:</p>
+  <ol>
+    <li>היכנסו ל-<a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>, פתחו חשבון, ולחצו <b>New project</b>. בחרו שם, סיסמה ואזור (Europe/Frankfurt).</li>
+    <li>בתפריט הצד: <b>SQL Editor → New query</b>. הדביקו את תוכן הקובץ <code>supabase/schema.sql</code> מהמאגר ולחצו <b>Run</b>.</li>
+    <li><b>Authentication → Users → Add user</b>: צרו משתמש עם המייל והסיסמה שלכם. זה המשתמש של פאנל הניהול.</li>
+    <li><b>Project Settings → API</b>: העתיקו את <code>Project URL</code> ואת המפתח <code>anon public</code>.</li>
+    <li>הדביקו אותם בקובץ <code>config.js</code> במאגר (או שלחו אותם ל-Claude והוא יעדכן), ודחפו ל-GitHub.</li>
+  </ol>
+  <p class="muted">אחרי הרענון הבא העמוד הזה יציג מסך התחברות.</p>
+</div>
+
+<div id="login" class="login" hidden>
+  <h1>כניסה לניהול</h1>
+  <label>מייל<input id="lEmail" type="email" autocomplete="username" dir="ltr"></label>
+  <label>סיסמה<input id="lPass" type="password" autocomplete="current-password" dir="ltr"></label>
+  <button class="btn" id="lBtn">כניסה</button>
+  <div id="lErr" class="err" hidden></div>
+</div>
+
+<div id="app" hidden>
+  <div class="top"><h1>ניהול · <span id="storeName">מנות של פורים</span></h1><span class="sp"></span><a href="./" target="_blank" rel="noopener">האתר</a><button id="logout" type="button">יציאה</button></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="dash">לוח בקרה</button>
+    <button role="tab" aria-selected="false" data-tab="orders">הזמנות <span id="pendingBadge"></span></button>
+    <button role="tab" aria-selected="false" data-tab="products">מוצרים</button>
+    <button role="tab" aria-selected="false" data-tab="settings">הגדרות האתר</button>
+    <button role="tab" aria-selected="false" data-tab="pay">תשלום וצ'אט</button>
+  </div>
+  <main>
+    <!-- לוח בקרה -->
+    <section class="panel on" id="p-dash">
+      <div class="row" style="margin-bottom:12px"><label style="display:inline-grid">טווח<select id="range" style="width:auto"><option value="7">7 ימים</option><option value="30" selected>30 ימים</option><option value="90">90 ימים</option><option value="365">שנה</option></select></label></div>
+      <div class="cards" id="stats"></div>
+      <div class="box"><h2>כניסות והזמנות לפי יום</h2><div class="bars" id="bars"></div><div class="legend"><span><i style="background:var(--wine)"></i>כניסות</span><span><i style="background:var(--gold)"></i>הזמנות</span></div></div>
+      <div class="box"><h2>המארזים הנמכרים ביותר</h2><div class="tbl"><table id="top"></table></div></div>
+    </section>
+
+    <!-- הזמנות -->
+    <section class="panel" id="p-orders">
+      <div class="box"><h2>הזמנות <span class="row"><input id="oSearch" placeholder="חיפוש: שם, טלפון, מס' הזמנה" style="width:240px"><select id="oStatus" style="width:auto"><option value="">כל הסטטוסים</option><option value="new">חדשה</option><option value="awaiting_payment">ממתינה לתשלום</option><option value="paid_pending">שולם – לאימות</option><option value="paid">שולם</option><option value="preparing">בהכנה</option><option value="delivered">נמסר</option><option value="cancelled">בוטל</option></select><button class="btn sec sm" id="oCsv">ייצוא CSV</button><button class="btn sec sm" id="oRefresh">רענון</button></span></h2>
+        <div class="tbl"><table id="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- מוצרים -->
+    <section class="panel" id="p-products">
+      <div class="box"><h2>מוצרים <button class="btn sm" id="pNew">+ מוצר חדש</button></h2>
+        <div class="tbl"><table id="products"><thead><tr><th></th><th>שם</th><th>קטגוריה</th><th>מחיר</th><th>מלאי</th><th>סדר</th><th>מוצג</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- הגדרות -->
+    <section class="panel" id="p-settings">
+      <form class="box" id="sForm"><h2>הגדרות האתר <button class="btn sm" type="submit">שמירה</button></h2>
+        <div class="form">
+          <label>שם החנות<input name="store_name"></label>
+          <label>וואטסאפ להזמנות (בינלאומי, בלי +)<input name="whatsapp" dir="ltr" placeholder="972501234567"></label>
+          <label>מייל ליצירת קשר<input name="contact_email" type="email" dir="ltr"></label>
+          <label>תאריך פורים (לספירה לאחור)<input name="purim_date" type="date"></label>
+          <label>דמי משלוח (₪)<input name="shipping_fee" type="number" step="0.1" min="0"></label>
+          <label>משלוח חינם מעל (₪, ריק = אין)<input name="free_shipping_min" type="number" step="1" min="0"></label>
+          <label class="full">ערים למשלוח (מופרדות בפסיק)<input name="cities"></label>
+          <label class="full">הנחות כמות (כמות:אחוז, מופרד בפסיק)<input name="discount_tiers" dir="ltr" placeholder="10:5, 25:10, 50:15"></label>
+          <label class="full">כותרת ראשית<input name="hero_title"></label>
+          <label class="full">טקסט משנה<textarea name="hero_sub" rows="2"></textarea></label>
+          <label class="full">פס הודעה עליון (ריק = מוסתר)<input name="banner_text" placeholder="למשל: הזמנות עד י' באדר · משלוחים בירושלים והסביבה"></label>
+          <label>טקסט "הזמנות אחרונות"<input name="last_order_text"></label>
+        </div>
+      </form>
+    </section>
+
+    <!-- תשלום וצ'אט -->
+    <section class="panel" id="p-pay">
+      <form class="box" id="payForm"><h2>תשלום <button class="btn sm" type="submit">שמירה</button></h2>
+        <div class="form">
+          <label class="chk full"><input type="checkbox" name="pay_card_enabled"> לאפשר תשלום בכרטיס אשראי</label>
+          <label>ספק סליקה<select name="pay_provider"><option value="none">לא מוגדר</option><option value="tranzila">Tranzila (דף תשלום ישיר)</option><option value="link">קישור תשלום כללי (Grow/Meshulam, PayBox, Bit לעסקים…)</option></select></label>
+          <label>שם מסוף Tranzila<input name="pay_terminal" dir="ltr"></label>
+          <label class="full">תבנית קישור תשלום<input name="pay_link_template" dir="ltr" placeholder="https://pay.example.com/abc?sum={sum}&desc={order}"><small class="muted">משתנים: {sum} סכום · {order} מס' הזמנה · {name} שם · {phone} טלפון</small></label>
+          <label class="chk"><input type="checkbox" name="pay_bit_enabled"> ביט / פייבוקס</label>
+          <label>מספר לביט/פייבוקס<input name="pay_bit_phone" dir="ltr" placeholder="050-1234567"></label>
+          <label class="chk"><input type="checkbox" name="pay_cash_enabled"> מזומן באיסוף/במסירה</label>
+        </div>
+        <p class="muted" style="margin:12px 0 0">לספקים שדורשים חיבור שרת (Cardcom, PayPlus, Meshulam API) יש להוסיף Edge Function. תגידו ל-Claude איזה ספק בחרתם והוא יוסיף אותו.</p>
+      </form>
+      <form class="box" id="chatForm"><h2>צ'אט ואנליטיקה <button class="btn sm" type="submit">שמירה</button></h2>
+        <div class="form">
+          <label class="full">Tawk.to – מזהה ווידג'ט<input name="tawk_id" dir="ltr" placeholder="65f1a2b3c4d5e6f7a8b9c0d1/1hq2r3s4t"><small class="muted">מ-tawk.to → Administration → Chat Widget → הקוד מכיל <code>embed.tawk.to/XXXX/YYYY</code>. הדביקו את <code>XXXX/YYYY</code>. כשמוגדר, כפתור הוואטסאפ הצף מוחלף בצ'אט.</small></label>
+          <label class="full">Google Analytics – מזהה מדידה<input name="ga_id" dir="ltr" placeholder="G-XXXXXXXXXX"></label>
+          <label class="full">כתובת השולח למיילים אוטומטיים<input name="receipt_from" dir="ltr" placeholder="orders@yourdomain.co.il"></label>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<div class="drawer" id="editor" hidden><div class="in" role="dialog" aria-modal="true" id="editorIn"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const CFG=window.SITE_CONFIG||{};
+if(!(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase)){ $("#setup").hidden=false; return; }
+const sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
+const ils=n=>"₪"+Number(n||0).toLocaleString("he-IL",{maximumFractionDigits:2});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate=d=>new Date(d).toLocaleString("he-IL",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+const STATUS={new:"חדשה",awaiting_payment:"ממתינה לתשלום",paid_pending:"שולם – לאימות",paid:"שולם",preparing:"בהכנה",delivered:"נמסר",cancelled:"בוטל"};
+const PAY={card:"אשראי",bit:"ביט",cash:"מזומן",whatsapp:"וואטסאפ"};
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2200);}
+function fail(e){console.error(e);toast("שגיאה: "+(e.message||e));}
+
+// ---------- התחברות ----------
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){ $("#login").hidden=true; $("#app").hidden=false; await loadAll(); }
+  else { $("#login").hidden=false; $("#app").hidden=true; }
+}
+$("#lBtn").onclick=async()=>{ $("#lErr").hidden=true; const {error}=await sb.auth.signInWithPassword({email:$("#lEmail").value.trim(),password:$("#lPass").value}); if(error){$("#lErr").textContent="התחברות נכשלה: "+error.message;$("#lErr").hidden=false;return;} boot(); };
+$("#lPass").addEventListener("keydown",e=>{if(e.key==="Enter")$("#lBtn").click()});
+$("#logout").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+
+// ---------- טאבים ----------
+$$(".tabs button").forEach(b=>b.onclick=()=>{ $$(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b)); $$(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.tab)); });
+
+let SETTINGS={}, PRODUCTS=[], ORDERS=[];
+async function loadAll(){ await Promise.all([loadSettings(),loadStats(),loadOrders(),loadProducts()]); }
+
+// ---------- לוח בקרה ----------
+async function loadStats(){
+  const days=+$("#range").value;
+  const {data,error}=await sb.rpc("dashboard_stats",{days}); if(error) return fail(error);
+  const conv=data.unique_visitors?(100*data.orders/data.unique_visitors).toFixed(1):"0";
+  $("#stats").innerHTML=[["כניסות",data.visits],["מבקרים ייחודיים",data.unique_visitors],["הזמנות",data.orders],["אחוז המרה",conv+"%"],["הכנסות (שולם)",ils(data.revenue)],["ממתינות לטיפול",data.pending]].map(([k,v])=>`<div class="stat"><small>${k}</small><b>${v}</b></div>`).join("");
+  const by=data.by_day||[]; const mx=Math.max(1,...by.map(d=>d.visits));
+  $("#bars").innerHTML=by.length?by.map(d=>`<div title="${d.day}: ${d.visits} כניסות, ${d.orders} הזמנות" style="height:${Math.max(3,100*d.visits/mx)}%"><i style="height:${d.visits?100*d.orders/d.visits:0}%"></i>${by.length<=31?`<span>${d.day.slice(8)}</span>`:""}</div>`).join(""):`<p class="muted">אין עדיין נתונים.</p>`;
+  $("#top").innerHTML=(data.top_products||[]).length?`<thead><tr><th>מארז</th><th>כמות</th></tr></thead><tbody>${data.top_products.map(t=>`<tr><td>${esc(t.name)}</td><td>${t.qty}</td></tr>`).join("")}</tbody>`:`<tr><td class="muted">אין עדיין הזמנות.</td></tr>`;
+}
+$("#range").onchange=loadStats;
+
+// ---------- הזמנות ----------
+async function loadOrders(){
+  const {data,error}=await sb.from("orders").select("*").order("created_at",{ascending:false}).limit(500); if(error) return fail(error);
+  ORDERS=data; renderOrders();
+  const pend=data.filter(o=>["new","awaiting_payment","paid_pending"].includes(o.status)).length;
+  $("#pendingBadge").textContent=pend?`(${pend})`:"";
+}
+function renderOrders(){
+  const q=$("#oSearch").value.trim(), st=$("#oStatus").value;
+  const list=ORDERS.filter(o=>(!st||o.status===st)&&(!q||[o.order_no,o.customer_name,o.phone,o.city].join(" ").includes(q)));
+  $("#orders tbody").innerHTML=list.map(o=>`<tr>
+    <td><b>${o.order_no}</b></td><td>${fmtDate(o.created_at)}</td>
+    <td>${esc(o.customer_name)}<br><a href="https://wa.me/${o.phone.replace(/\D/g,"").replace(/^0/,"972")}" target="_blank" rel="noopener" dir="ltr">${esc(o.phone)}</a><br><small class="muted">${esc(o.city||"")} · ${o.delivery==="ship"?"משלוח":"איסוף"}</small></td>
+    <td><pre class="items">${o.items.map(i=>`${i.name} × ${i.qty}`).join("\n")}</pre></td>
+    <td><b>${ils(o.total)}</b></td><td>${PAY[o.payment_method]||o.payment_method}${o.payment_ref?`<br><small dir="ltr">${esc(o.payment_ref)}</small>`:""}</td>
+    <td><select data-st="${o.id}" class="pill s-${o.status}" style="border:0;width:auto">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===o.status?"selected":""}>${v}</option>`).join("")}</select></td>
+    <td><button class="btn sec sm" data-view="${o.id}">פרטים</button></td></tr>`).join("")||`<tr><td colspan="8" class="muted">אין הזמנות תואמות.</td></tr>`;
+}
+$("#oSearch").oninput=renderOrders; $("#oStatus").onchange=renderOrders; $("#oRefresh").onclick=loadOrders;
+$("#orders").addEventListener("change",async e=>{ const s=e.target.closest("[data-st]"); if(!s) return; const {error}=await sb.from("orders").update({status:s.value}).eq("id",s.dataset.st); if(error) return fail(error); s.className="pill s-"+s.value; toast("הסטטוס עודכן"); loadStats(); });
+$("#orders").addEventListener("click",e=>{ const b=e.target.closest("[data-view]"); if(b) openOrder(ORDERS.find(o=>o.id==b.dataset.view)); });
+function openOrder(o){
+  openEditor(`<h2>הזמנה ${o.order_no}</h2>
+    <div class="box"><b>${esc(o.customer_name)}</b> · <span dir="ltr">${esc(o.phone)}</span>${o.email?` · <span dir="ltr">${esc(o.email)}</span>`:""}<br>${esc(o.city||"")}${o.address?", "+esc(o.address):""} · ${o.delivery==="ship"?"משלוח עד הבית":"איסוף עצמי"}<br><small class="muted">${new Date(o.created_at).toLocaleString("he-IL")}</small></div>
+    <div class="box"><table>${o.items.map(i=>`<tr><td>${esc(i.name)}</td><td>× ${i.qty}</td><td>${ils(i.price*i.qty)}</td></tr>`).join("")}<tr><td colspan="2">סכום ביניים</td><td>${ils(o.subtotal)}</td></tr>${+o.discount?`<tr><td colspan="2">הנחה</td><td>−${ils(o.discount)}</td></tr>`:""}<tr><td colspan="2">משלוח</td><td>${ils(o.shipping)}</td></tr><tr><td colspan="2"><b>סה"כ</b></td><td><b>${ils(o.total)}</b></td></tr></table></div>
+    ${o.note?`<div class="box"><b>הערת הלקוח:</b><br>${esc(o.note)}</div>`:""}
+    <label>סטטוס<select id="eStatus">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===o.status?"selected":""}>${v}</option>`).join("")}</select></label>
+    <label>אסמכתת תשלום<input id="eRef" value="${esc(o.payment_ref||"")}" dir="ltr"></label>
+    <label>הערה פנימית<textarea id="eNote" rows="3">${esc(o.admin_note||"")}</textarea></label>
+    <div class="row"><button class="btn" id="eSave">שמירה</button><a class="btn sec" href="https://wa.me/${o.phone.replace(/\D/g,"").replace(/^0/,"972")}?text=${encodeURIComponent(`שלום ${o.customer_name}, לגבי הזמנה ${o.order_no} שלך:`)}" target="_blank" rel="noopener">וואטסאפ ללקוח</a><span class="sp" style="flex:1"></span><button class="btn bad sm" id="eDel">מחיקה</button></div>`);
+  $("#eSave").onclick=async()=>{ const {error}=await sb.from("orders").update({status:$("#eStatus").value,payment_ref:$("#eRef").value||null,admin_note:$("#eNote").value||null}).eq("id",o.id); if(error) return fail(error); closeEditor(); toast("נשמר"); loadOrders(); loadStats(); };
+  $("#eDel").onclick=async()=>{ if($("#eDel").dataset.sure!=="1"){ $("#eDel").dataset.sure="1"; $("#eDel").textContent="לחצו שוב לאישור המחיקה"; return; } const {error}=await sb.from("orders").delete().eq("id",o.id); if(error) return fail(error); closeEditor(); toast("נמחק"); loadOrders(); loadStats(); };
+}
+$("#oCsv").onclick=()=>{
+  const rows=[["מס'","תאריך","שם","טלפון","מייל","עיר","קבלה","פריטים","סכום ביניים","הנחה","משלוח","סה\"כ","תשלום","סטטוס","הערה"]].concat(ORDERS.map(o=>[o.order_no,new Date(o.created_at).toLocaleString("he-IL"),o.customer_name,o.phone,o.email||"",o.city||"",o.delivery,o.items.map(i=>`${i.name} x${i.qty}`).join(" | "),o.subtotal,o.discount,o.shipping,o.total,PAY[o.payment_method]||o.payment_method,STATUS[o.status]||o.status,o.note||""]));
+  const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download="orders.csv"; a.click();
+};
+
+// ---------- מוצרים ----------
+async function loadProducts(){ const {data,error}=await sb.from("products").select("*").order("sort"); if(error) return fail(error); PRODUCTS=data; renderProducts(); }
+function renderProducts(){
+  $("#products tbody").innerHTML=PRODUCTS.map(p=>`<tr>
+    <td>${p.image_url?`<img class="thumb" src="${p.image_url}" alt="">`:`<div class="thumb"></div>`}</td>
+    <td><b>${esc(p.name)}</b>${p.tag?` <span class="pill s-new">${esc(p.tag)}</span>`:""}<br><small class="muted dir">${p.id}</small></td>
+    <td>${esc(p.category)}</td><td>${ils(p.price)}</td><td>${p.stock??"∞"}</td><td>${p.sort}</td>
+    <td><input type="checkbox" data-vis="${p.id}" ${p.visible?"checked":""} aria-label="מוצג באתר"></td>
+    <td><button class="btn sec sm" data-edit="${p.id}">עריכה</button></td></tr>`).join("");
+}
+$("#products").addEventListener("change",async e=>{ const c=e.target.closest("[data-vis]"); if(!c) return; const {error}=await sb.from("products").update({visible:c.checked}).eq("id",c.dataset.vis); if(error) return fail(error); toast(c.checked?"המוצר מוצג":"המוצר הוסתר"); });
+$("#products").addEventListener("click",e=>{ const b=e.target.closest("[data-edit]"); if(b) openProduct(PRODUCTS.find(p=>p.id===b.dataset.edit)); });
+$("#pNew").onclick=()=>openProduct(null);
+function openProduct(p){
+  const n=!p; p=p||{id:"",name:"",category:"ילדים",price:"",items:[],tag:"",color:"#e3b252",visible:true,sort:100,stock:null,image_url:"",image2_url:"",video_url:""};
+  openEditor(`<h2>${n?"מוצר חדש":"עריכת מוצר"}</h2>
+    <div class="form">
+      <label>מזהה (אנגלית, ללא רווחים)<input id="pId" value="${esc(p.id)}" dir="ltr" ${n?"":"readonly"}></label>
+      <label>שם<input id="pName" value="${esc(p.name)}"></label>
+      <label>קטגוריה<input id="pCat" value="${esc(p.category)}" list="cats"><datalist id="cats">${[...new Set(PRODUCTS.map(x=>x.category))].map(c=>`<option value="${esc(c)}">`).join("")}</datalist></label>
+      <label>מחיר (₪)<input id="pPrice" type="number" step="0.1" min="0" value="${p.price}"></label>
+      <label>תווית (חדש / מבצע…)<input id="pTag" value="${esc(p.tag||"")}"></label>
+      <label>צבע רקע<input id="pColor" type="color" value="${p.color||"#e3b252"}"></label>
+      <label>מלאי (ריק = ללא מעקב)<input id="pStock" type="number" min="0" value="${p.stock??""}"></label>
+      <label>סדר תצוגה<input id="pSort" type="number" value="${p.sort}"></label>
+      <label class="full">תכולה (שורה לכל פריט)<textarea id="pItems" rows="5">${esc((p.items||[]).join("\n"))}</textarea></label>
+      <label class="full">תמונה ראשית ${p.image_url?`<img class="thumb" src="${p.image_url}" alt="">`:""}<input id="pImg" type="file" accept="image/*"></label>
+      <label class="full">תמונה צד ב' (אופציונלי) ${p.image2_url?`<img class="thumb" src="${p.image2_url}" alt="">`:""}<input id="pImg2" type="file" accept="image/*"></label>
+      <label class="full">סרטון (mp4, אופציונלי) ${p.video_url?`<small class="muted dir">${esc(p.video_url)}</small>`:""}<input id="pVid" type="file" accept="video/mp4"></label>
+      <label class="chk full"><input id="pVis" type="checkbox" ${p.visible?"checked":""}> מוצג באתר</label>
+    </div>
+    <div class="row"><button class="btn" id="pSave">שמירה</button><span style="flex:1"></span>${n?"":`<button class="btn bad sm" id="pDel">מחיקת מוצר</button>`}</div><div id="pMsg" class="muted"></div>`);
+  async function upload(file,path){ const {error}=await sb.storage.from("product-images").upload(path,file,{upsert:true,cacheControl:"3600"}); if(error) throw error; return sb.storage.from("product-images").getPublicUrl(path).data.publicUrl+"?v="+Date.now(); }
+  $("#pSave").onclick=async()=>{
+    try{
+      const id=$("#pId").value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,""); if(!id||!$("#pName").value.trim()||!$("#pPrice").value) return toast("נא למלא מזהה, שם ומחיר");
+      $("#pMsg").textContent="מעלה…";
+      const rec={id,name:$("#pName").value.trim(),category:$("#pCat").value.trim()||"ילדים",price:+$("#pPrice").value,tag:$("#pTag").value.trim()||null,color:$("#pColor").value,stock:$("#pStock").value===""?null:+$("#pStock").value,sort:+$("#pSort").value||100,items:$("#pItems").value.split("\n").map(s=>s.trim()).filter(Boolean),visible:$("#pVis").checked};
+      if($("#pImg").files[0]) rec.image_url=await upload($("#pImg").files[0],`${id}/main.${$("#pImg").files[0].name.split(".").pop()}`);
+      if($("#pImg2").files[0]) rec.image2_url=await upload($("#pImg2").files[0],`${id}/side2.${$("#pImg2").files[0].name.split(".").pop()}`);
+      if($("#pVid").files[0]) rec.video_url=await upload($("#pVid").files[0],`${id}/video.mp4`);
+      const {error}=n?await sb.from("products").insert(rec):await sb.from("products").update(rec).eq("id",id); if(error) throw error;
+      closeEditor(); toast("המוצר נשמר"); loadProducts();
+    }catch(e){ fail(e); $("#pMsg").textContent=""; }
+  };
+  const d=$("#pDel"); if(d) d.onclick=async()=>{ if(d.dataset.sure!=="1"){d.dataset.sure="1";d.textContent="לחצו שוב לאישור";return;} const {error}=await sb.from("products").delete().eq("id",p.id); if(error) return fail(error); closeEditor(); toast("נמחק"); loadProducts(); };
+}
+
+// ---------- הגדרות ----------
+async function loadSettings(){
+  const {data,error}=await sb.from("settings").select("*").eq("id",1).single(); if(error) return fail(error); SETTINGS=data; $("#storeName").textContent=data.store_name;
+  for(const f of [$("#sForm"),$("#payForm"),$("#chatForm")]) for(const el of f.elements){ if(!el.name) continue; const v=data[el.name];
+    if(el.type==="checkbox") el.checked=!!v; else if(el.name==="cities") el.value=(v||[]).join(", "); else if(el.name==="discount_tiers") el.value=(v||[]).map(t=>`${t.min}:${t.pct}`).join(", "); else el.value=v??""; }
+}
+function formData(f){ const o={}; for(const el of f.elements){ if(!el.name) continue;
+  if(el.type==="checkbox") o[el.name]=el.checked; else if(el.name==="cities") o[el.name]=el.value.split(",").map(s=>s.trim()).filter(Boolean);
+  else if(el.name==="discount_tiers") o[el.name]=el.value.split(",").map(s=>s.trim()).filter(Boolean).map(s=>{const [m,p]=s.split(":");return {min:+m,pct:+p}}).filter(t=>t.min>0&&t.pct>0).sort((a,b)=>a.min-b.min);
+  else if(el.type==="number") o[el.name]=el.value===""?null:+el.value; else o[el.name]=el.value.trim()||null; } return o; }
+for(const id of ["sForm","payForm","chatForm"]) $("#"+id).addEventListener("submit",async e=>{ e.preventDefault(); const upd=formData(e.target); if(upd.whatsapp) upd.whatsapp=upd.whatsapp.replace(/\D/g,""); if(upd.store_name===null) delete upd.store_name; const {error}=await sb.from("settings").update(upd).eq("id",1); if(error) return fail(error); toast("ההגדרות נשמרו. האתר יתעדכן בטעינה הבאה."); loadSettings(); });
+
+// ---------- עורך צד ----------
+function openEditor(html){ $("#editorIn").innerHTML=`<div class="row" style="justify-content:flex-end"><button class="btn sec sm" id="edClose" aria-label="סגירה">✕</button></div>`+html; $("#editor").hidden=false; $("#edClose").onclick=closeEditor; }
+function closeEditor(){ $("#editor").hidden=true; }
+$("#editor").addEventListener("click",e=>{ if(e.target.id==="editor") closeEditor(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeEditor(); });
+
+boot();
+})();
+</script>
+</body>
+</html>
