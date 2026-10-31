@@ -189,18 +189,15 @@ async function submitOrder(e){
   btn.disabled=false; btn.textContent="שליחת הזמנה";
   const text=orderText(order);
   $("#summary").textContent=text;
-  $("#waLink").href=`https://wa.me/${S.whatsapp}?text=${encodeURIComponent(text)}`;
   $("#phoneShow").textContent="+"+S.whatsapp;
   const d=$("#done"); d.hidden=false;
   const h=$("#doneHead"), payBox=$("#payBox"); payBox.innerHTML="";
-  if(order.payment_method==="card"){
-    const url=paymentUrl(order);
-    h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. עכשיו לתשלום מאובטח:`:"ההזמנה מוכנה. עכשיו לתשלום מאובטח:";
-    if(url){ payBox.innerHTML=`<a class="paybtn" href="${url}">מעבר לתשלום בכרטיס אשראי ${ils(order.total)}</a><small>התשלום מתבצע בדף מאובטח של חברת הסליקה. בסיום תוחזרו לאתר.</small>`; }
-    else payBox.innerHTML=`<small>תשלום באשראי עדיין לא הופעל. שלחו את ההזמנה בוואטסאפ ונחזור אליכם עם קישור לתשלום.</small>`;
-  } else if(order.payment_method==="cash"){
-    h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. התשלום במזומן ${order.delivery==="ship"?"במסירה":"באיסוף"}.`:"ההזמנה מוכנה.";
-  } else h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. שלחו אותה אלינו בוואטסאפ כדי שנאשר:`:"ההזמנה מוכנה. שלחו אותה אלינו בוואטסאפ כדי שנאשר:";
+  const url=paymentUrl(order), pl=$("#payLink");
+  if(url){ pl.href=url; pl.removeAttribute("aria-disabled"); pl.textContent=`תשלום מאובטח בכרטיס אשראי ${ils(order.total)}`; }
+  else { pl.href="#"; pl.setAttribute("aria-disabled","true"); pl.textContent="תשלום מאובטח בכרטיס אשראי – יופעל בקרוב"; }
+  if(order.payment_method==="card") h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. עכשיו לתשלום מאובטח:`:"ההזמנה מוכנה. עכשיו לתשלום מאובטח:";
+  else if(order.payment_method==="cash") h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. התשלום במזומן ${order.delivery==="ship"?"במסירה":"באיסוף"}.`:"ההזמנה מוכנה.";
+  else h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה.`:"ההזמנה מוכנה.";
   announce(h.textContent);
   if(saved){ try{ cart={}; save(); }catch(e){} }
   d.scrollIntoView({behavior:"smooth",block:"start"});
