@@ -137,6 +137,23 @@ function renderCart(){
 function toast(msg){ const el=$("#toast"); el.textContent=msg; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,1800); }
 function announce(msg){ const a=$("#announce"); a.textContent=""; setTimeout(()=>a.textContent=msg,50); }
 
+// ---------- פופאפ זמני אספקה ----------
+let noticeResolve=null, noticeFocus=null;
+function showNotice(opts={}){
+  return new Promise(res=>{
+    noticeResolve=res; noticeFocus=document.activeElement;
+    $("#noticeTitle").textContent=opts.title||"זמני אספקה";
+    $("#noticeOk").textContent=opts.ok||"הבנתי";
+    $("#noticeCancel").hidden=!opts.cancel;
+    $("#notice").hidden=false; setTimeout(()=>$("#noticeOk").focus(),30);
+    announce($("#noticeText").textContent);
+  });
+}
+function closeNotice(v){ if($("#notice").hidden) return; $("#notice").hidden=true; const r=noticeResolve; noticeResolve=null; if(noticeFocus&&noticeFocus.focus) noticeFocus.focus(); if(r) r(v); }
+$("#noticeOk").onclick=()=>closeNotice(true);
+$("#noticeCancel").onclick=()=>closeNotice(false);
+$("#notice").addEventListener("keydown",e=>{ if(e.key==="Tab"){ const f=[...$("#notice").querySelectorAll("button")].filter(x=>!x.hidden); if(f.length<2){e.preventDefault();return;} const a=f[0],z=f[f.length-1]; if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();} else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();} } });
+
 // ---------- תשלום ----------
 function paymentUrl(order){
   const sum=order.total.toFixed(2), name=encodeURIComponent(order.customer_name), phone=encodeURIComponent(order.phone);
@@ -158,6 +175,8 @@ async function submitOrder(e){
   const name=$("#fName").value.trim(), phone=$("#fPhone").value.replace(/[^\d+]/g,""), email=$("#fEmail").value.trim();
   if(!name||phone.length<9){ toast("נא למלא שם וטלפון תקין"); (name?$("#fPhone"):$("#fName")).focus(); return; }
   if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ toast("כתובת מייל לא תקינה"); $("#fEmail").focus(); return; }
+  const go=await showNotice({title:"לפני שמסיימים: זמני אספקה",ok:"אישור ושליחת ההזמנה",cancel:true});
+  if(!go){ $("#submitBtn").focus(); return; }
   const t=totals();
   const order={customer_name:name, phone, email:email||null, city:$("#fCity").value, delivery:$("#fDelivery").value, note:$("#fNote").value.trim()||null,
     items:Object.entries(cart).map(([id,q])=>({id,name:P(id).name,price:P(id).price,qty:q})),
@@ -216,7 +235,7 @@ function closeDrawer(){ if($("#drawer").hidden) return; $("#drawer").hidden=true
 $("#openCart").onclick=openDrawer; $("#closeCart").onclick=closeDrawer;
 $("#drawer").addEventListener("click",e=>{ if(e.target.id==="drawer") closeDrawer(); });
 $("#drawer").addEventListener("keydown",e=>{ if(e.key!=="Tab") return; const f=[...$("#drawer").querySelectorAll('button,[href],input,select,textarea')].filter(x=>!x.hidden&&x.offsetParent!==null); if(!f.length) return; const a=f[0],z=f[f.length-1]; if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();} else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();} });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeDrawer(); closeA11y(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ if(!$("#notice").hidden){ closeNotice(false); return; } closeDrawer(); closeA11y(); } });
 $("#fDelivery").onchange=renderCart;
 $("#orderForm").addEventListener("submit",submitOrder);
 $("#copyBtn").onclick=()=>{ const text=$("#summary").textContent; navigator.clipboard.writeText(text).then(()=>toast("הועתק")).catch(()=>{ const r=document.createRange(); r.selectNodeContents($("#summary")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("סמנו והעתיקו ידנית"); }); };
@@ -240,5 +259,6 @@ document.querySelector(".skip").addEventListener("click",e=>{ e.preventDefault()
   applySettings(); renderFilters(); renderGrid(); renderCart();
   await handleReturn();
   trackVisit();
+  if(!new URLSearchParams(location.search).has("paid")){ let seen=false; try{ seen=sessionStorage.getItem("mm-notice")==="1"; }catch(e){} if(!seen){ await showNotice(); try{ sessionStorage.setItem("mm-notice","1"); }catch(e){} } }
 })();
 })();
