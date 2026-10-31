@@ -20,7 +20,7 @@ let S = {
   purim_date:"2027-03-23", last_order_text:"הזמנות אחרונות עד ט' באדר", banner_text:null,
   hero_title:null, hero_sub:null,
   pay_card_enabled:false, pay_provider:"none", pay_terminal:"", pay_link_template:"",
-  pay_bit_enabled:true, pay_bit_phone:"", pay_cash_enabled:true, tawk_id:"", ga_id:""
+  pay_cash_enabled:true, tawk_id:"", ga_id:""
 };
 let PRODUCTS = [
   {id:"gold",  name:"מארז ממתקים מוזהב",     category:"ילדים", price:35,    tag:"חדש", color:"#e3b252", items:["בקבוק שתייה לילדים עם פיה","כיף כף ומיני ופל Loacker","מרשמלו וחטיפי שוקולד","מטבע שוקולד","קופסת מתנה עם ידית"]},
@@ -79,8 +79,8 @@ function applySettings(){
   $("#tiers").innerHTML=`<tr><td>1–${(S.discount_tiers[0]?.min||10)-1}</td><td>מחיר מלא</td></tr>`+S.discount_tiers.map((t,i)=>{const nx=S.discount_tiers[i+1];return `<tr><td>${t.min}${nx?`–${nx.min-1}`:" ומעלה"}</td><td class="off">${t.pct}%</td></tr>`}).join("");
   // אמצעי תשלום
   const pm=$("#fPay"); pm.innerHTML="";
-  if(S.pay_card_enabled && S.pay_provider!=="none") pm.innerHTML+=`<option value="card">כרטיס אשראי (מאובטח)</option>`;
-  if(S.pay_bit_enabled) pm.innerHTML+=`<option value="bit">ביט / פייבוקס</option>`;
+  const cardOn=S.pay_card_enabled && S.pay_provider!=="none";
+  pm.innerHTML+=cardOn?`<option value="card">כרטיס אשראי (תשלום מאובטח)</option>`:`<option value="card" disabled>כרטיס אשראי (תשלום מאובטח) – יופעל בקרוב</option>`;
   if(S.pay_cash_enabled) pm.innerHTML+=`<option value="cash">מזומן באיסוף / במסירה</option>`;
   pm.innerHTML+=`<option value="whatsapp">סיכום בוואטסאפ</option>`;
   const days=Math.max(0,Math.ceil((new Date(S.purim_date+"T00:00:00")-new Date())/864e5)); $("#days").textContent=days;
@@ -150,7 +150,7 @@ function paymentUrl(order){
 }
 function orderText(o){
   const lines=o.items.map(i=>`• ${i.name} × ${i.qty}`).join("\n");
-  const pay={card:"כרטיס אשראי",bit:"ביט / פייבוקס",cash:"מזומן",whatsapp:"לסיכום"}[o.payment_method];
+  const pay={card:"כרטיס אשראי",cash:"מזומן",whatsapp:"לסיכום"}[o.payment_method];
   return `הזמנת משלוחי מנות${o.order_no?` מס' ${o.order_no}`:""}\nשם: ${o.customer_name}\nטלפון: ${o.phone}${o.email?`\nמייל: ${o.email}`:""}\nעיר: ${o.city}\nקבלה: ${o.delivery==="ship"?"משלוח עד הבית":"איסוף עצמי"}\nתשלום: ${pay}\n\n${lines}\n\n${o.discount?`הנחת כמות: −${ils(o.discount)}\n`:""}${o.shipping?`משלוח: ${ils(o.shipping)}\n`:""}סה"כ לתשלום: ${ils(o.total)}${o.note?`\n\nהערות: ${o.note}`:""}`;
 }
 async function submitOrder(e){
@@ -179,9 +179,6 @@ async function submitOrder(e){
     h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. עכשיו לתשלום מאובטח:`:"ההזמנה מוכנה. עכשיו לתשלום מאובטח:";
     if(url){ payBox.innerHTML=`<a class="paybtn" href="${url}">מעבר לתשלום בכרטיס אשראי ${ils(order.total)}</a><small>התשלום מתבצע בדף מאובטח של חברת הסליקה. בסיום תוחזרו לאתר.</small>`; }
     else payBox.innerHTML=`<small>תשלום באשראי עדיין לא הופעל. שלחו את ההזמנה בוואטסאפ ונחזור אליכם עם קישור לתשלום.</small>`;
-  } else if(order.payment_method==="bit"){
-    h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה.`:"ההזמנה מוכנה.";
-    payBox.innerHTML=`<div class="bitbox"><b>לתשלום בביט / פייבוקס:</b> העבירו ${ils(order.total)} למספר <span class="num">${esc(S.pay_bit_phone||"+"+S.whatsapp)}</span>${order.order_no?` וציינו בהערה "${order.order_no}"`:""}. לאחר ההעברה שלחו לנו צילום מסך בוואטסאפ.</div>`;
   } else if(order.payment_method==="cash"){
     h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. התשלום במזומן ${order.delivery==="ship"?"במסירה":"באיסוף"}.`:"ההזמנה מוכנה.";
   } else h.textContent=order.order_no?`הזמנה ${order.order_no} נקלטה. שלחו אותה אלינו בוואטסאפ כדי שנאשר:`:"ההזמנה מוכנה. שלחו אותה אלינו בוואטסאפ כדי שנאשר:";

@@ -139,12 +139,10 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
     <section class="panel" id="p-pay">
       <form class="box" id="payForm"><h2>תשלום <button class="btn sm" type="submit">שמירה</button></h2>
         <div class="form">
-          <label class="chk full"><input type="checkbox" name="pay_card_enabled"> לאפשר תשלום בכרטיס אשראי</label>
-          <label>ספק סליקה<select name="pay_provider"><option value="none">לא מוגדר</option><option value="tranzila">Tranzila (דף תשלום ישיר)</option><option value="link">קישור תשלום כללי (Grow/Meshulam, PayBox, Bit לעסקים…)</option></select></label>
+          <label class="chk full"><input type="checkbox" name="pay_card_enabled"> להפעיל תשלום בכרטיס אשראי <small class="muted">(כבוי: האפשרות מוצגת ללקוח כ"יופעל בקרוב")</small></label>
+          <label>ספק סליקה<select name="pay_provider"><option value="none">לא מוגדר</option><option value="tranzila">Tranzila (דף תשלום ישיר)</option><option value="link">דף תשלום של חברת הסליקה (קישור עם סכום)</option></select></label>
           <label>שם מסוף Tranzila<input name="pay_terminal" dir="ltr"></label>
           <label class="full">תבנית קישור תשלום<input name="pay_link_template" dir="ltr" placeholder="https://pay.example.com/abc?sum={sum}&desc={order}"><small class="muted">משתנים: {sum} סכום · {order} מס' הזמנה · {name} שם · {phone} טלפון</small></label>
-          <label class="chk"><input type="checkbox" name="pay_bit_enabled"> ביט / פייבוקס</label>
-          <label>מספר לביט/פייבוקס<input name="pay_bit_phone" dir="ltr" placeholder="050-1234567"></label>
           <label class="chk"><input type="checkbox" name="pay_cash_enabled"> מזומן באיסוף/במסירה</label>
         </div>
         <p class="muted" style="margin:12px 0 0">לספקים שדורשים חיבור שרת (Cardcom, PayPlus, Meshulam API) יש להוסיף Edge Function. תגידו ל-Claude איזה ספק בחרתם והוא יוסיף אותו.</p>
@@ -176,7 +174,7 @@ const ils=n=>"₪"+Number(n||0).toLocaleString("he-IL",{maximumFractionDigits:2}
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmtDate=d=>new Date(d).toLocaleString("he-IL",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
 const STATUS={new:"חדשה",awaiting_payment:"ממתינה לתשלום",paid_pending:"שולם – לאימות",paid:"שולם",preparing:"בהכנה",delivered:"נמסר",cancelled:"בוטל"};
-const PAY={card:"אשראי",bit:"ביט",cash:"מזומן",whatsapp:"וואטסאפ"};
+const PAY={card:"אשראי",cash:"מזומן",whatsapp:"וואטסאפ"};
 function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2200);}
 function fail(e){console.error(e);toast("שגיאה: "+(e.message||e));}
 

@@ -21,7 +21,7 @@ const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
 
 const ils = (n: number) => "₪" + Number(n).toLocaleString("he-IL", { maximumFractionDigits: 2 });
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
-const PAY: Record<string, string> = { card: "כרטיס אשראי", bit: "ביט / פייבוקס", cash: "מזומן", whatsapp: "לסיכום בוואטסאפ" };
+const PAY: Record<string, string> = { card: "כרטיס אשראי", cash: "מזומן", whatsapp: "לסיכום בוואטסאפ" };
 
 async function send(to: string, subject: string, html: string) {
   const r = await fetch("https://api.resend.com/emails", {

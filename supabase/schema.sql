@@ -41,7 +41,7 @@ create table if not exists orders (
   discount        numeric(10,2) not null default 0,
   shipping        numeric(10,2) not null default 0,
   total           numeric(10,2) not null,
-  payment_method  text not null default 'whatsapp', -- card | bit | cash | whatsapp
+  payment_method  text not null default 'whatsapp', -- card | cash | whatsapp
   payment_ref     text,                             -- אסמכתא מחברת הסליקה
   status          text not null default 'new',      -- new | awaiting_payment | paid_pending | paid | preparing | delivered | cancelled
   admin_note      text,
@@ -82,8 +82,6 @@ create table if not exists settings (
   pay_provider      text default 'none',            -- none | tranzila | link
   pay_terminal      text,                           -- שם מסוף (Tranzila)
   pay_link_template text,                           -- קישור תשלום עם {sum} {order} {name} {phone}
-  pay_bit_enabled   boolean not null default true,
-  pay_bit_phone     text,                           -- מספר לביט/פייבוקס
   pay_cash_enabled  boolean not null default true,
   -- צ'אט / אנליטיקה
   tawk_id           text,                           -- Property ID + Widget ID מ-Tawk.to, בפורמט "abc123/1xyz"
