@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="מארזי משלוח מנות לפורים בכשרות בד״ץ מהדרין. אתר נגיש.">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>מנות של פורים</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -55,7 +56,7 @@ button{font-family:inherit;cursor:pointer}
 .seal strong{display:block;font-family:var(--display);font-weight:900;font-size:1.45rem;line-height:1.1}
 
 /* trust strip */
-.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-block:1px solid var(--line)}
+.trust{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-block:1px solid var(--line)}
 .trust div{background:var(--surface);padding:16px;font-size:.95rem}
 .trust b{display:block;font-family:var(--display);font-size:1.05rem;color:var(--wine)}
 
@@ -139,43 +140,83 @@ footer .wrap{padding-block:28px;display:flex;justify-content:space-between;gap:1
   .bulk{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .2s}.card:hover{transform:translateY(-3px)}}
+/* ===== נגישות ===== */
+.skip{position:absolute;top:-100px;right:16px;background:var(--gold);color:#2a1626;padding:10px 16px;border-radius:0 0 10px 10px;font-weight:700;z-index:100;text-decoration:none}
+.skip:focus{top:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.a11y-btn{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));width:52px;height:52px;border-radius:50%;background:#1559c9;color:#fff;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:40;display:grid;place-items:center;padding:0}
+.a11y-btn svg{width:30px;height:30px}
+.a11y{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));width:min(320px,calc(100vw - 28px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:41;padding:14px;display:grid;gap:8px;max-height:calc(100vh - 110px);overflow-y:auto}
+.a11y h2{font-size:1.15rem;display:flex;justify-content:space-between;align-items:center}
+.a11y .opt{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--bg);color:var(--ink);font-weight:600;text-align:right;width:100%}
+.a11y .opt[aria-pressed="true"]{border-color:#1559c9;box-shadow:inset 0 0 0 2px #1559c9}
+.a11y .opt .st{font-size:.8rem;color:var(--muted)}
+.a11y .opt[aria-pressed="true"] .st{color:#0d47a1;font-weight:700}
+.a11y .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.a11y .reset{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px;font-weight:600}
+.a11y a{color:var(--wine);font-weight:600}
+/* מצבים */
+html.a-big{font-size:118%} html.a-bigger{font-size:136%}
+html.a-contrast{filter:contrast(1.25)}
+html.a-contrast body{background:#000;color:#fff}
+html.a-contrast .card,html.a-contrast .trust div,html.a-contrast .tbl,html.a-contrast .panel,html.a-contrast .a11y,html.a-contrast .chip,html.a-contrast input,html.a-contrast select,html.a-contrast textarea{background:#000!important;color:#fff!important;border-color:#fff!important}
+html.a-contrast .body ul,html.a-contrast .price small,html.a-contrast .note,html.a-contrast footer,html.a-contrast th,html.a-contrast .muted{color:#ffe9b0!important}
+html.a-contrast .add,html.a-contrast .submit,html.a-contrast .chip[aria-pressed="true"]{background:#ff0!important;color:#000!important}
+html.a-contrast :focus-visible{outline:4px solid #ff0}
+html.a-contrast .a11y .reset,html.a-contrast .a11y .opt{color:#fff!important;border-color:#fff!important}
+html.a-contrast .a11y .opt[aria-pressed="true"]{border-color:#ff0!important;box-shadow:inset 0 0 0 2px #ff0}
+html.a-contrast .a11y .opt .st,html.a-contrast .a11y a{color:#ff0!important}
+html.a-contrast .mast,html.a-contrast .mast *{color:#fff}
+html.a-links a,html.a-links button:not(.a11y-btn){text-decoration:underline!important;text-underline-offset:3px}
+html.a-motion *,html.a-motion *::before,html.a-motion *::after{animation:none!important;transition:none!important}
+html.a-font body,html.a-font h1,html.a-font h2,html.a-font h3,html.a-font .price,html.a-font .brand{font-family:Arial,"Segoe UI",sans-serif!important}
+html.a-gray{filter:grayscale(1)}
+html.a-contrast.a-gray{filter:grayscale(1) contrast(1.25)}
+html.a-cursor,html.a-cursor *{cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'><path d='M4 2l14 10-6 1 4 7-3 1-4-7-5 4z' fill='%23000' stroke='%23fff' stroke-width='1.5'/></svg>") 4 2,auto!important}
+.a11y-page{padding-block:44px;max-width:720px}
+.a11y-page h2{font-size:1.8rem;margin-bottom:12px}
+.a11y-page h3{font-size:1.15rem;margin-top:18px}
+.a11y-page ul{padding-right:20px}
+footer nav a{color:var(--wine);font-weight:600;margin-inline-start:14px}
+
 </style>
 
 </head>
 <body>
-<header class="mast">
+<a class="skip" href="#shop">דלג לתוכן הראשי</a>
+<header class="mast" role="banner">
   <div class="wrap">
     <div class="topbar">
-      <div class="brand">מנות <span>של פורים</span></div>
-      <button class="cartbtn" id="openCart" type="button">העגלה שלי <b id="cartCount">0</b></button>
+      <div class="brand" role="heading" aria-level="1" aria-label="מנות של פורים">מנות <span>של פורים</span></div>
+      <button class="cartbtn" id="openCart" type="button" aria-haspopup="dialog" aria-controls="drawer">העגלה שלי <b id="cartCount" aria-label="0 פריטים">0</b></button>
     </div>
     <div class="hero">
       <div>
-        <h1>משלוחי מנות <em>בכשרות בד"ץ מהדרין</em>, ארוזים ומוכנים לשליחה</h1>
+        <h1 aria-level="2">משלוחי מנות <em>בכשרות בד"ץ מהדרין</em>, ארוזים ומוכנים לשליחה</h1>
         <p>מארזים לכל תקציב: למשפחה, לשכנים, לגננת ולעובדים. כל המוצרים בכשרות מהדרין בלבד, ואנחנו דואגים למשלוח עד הדלת.</p>
         <div class="countdown">עד פורים תשפ"ז נשארו <strong id="days">—</strong> ימים</div>
       </div>
-      <div class="seal" aria-label="כל המוצרים בהשגחת בד״ץ מהדרין">
+      <div class="seal" role="img" aria-label="חותמת: כל המוצרים בהשגחת בד״ץ מהדרין, ללא פשרות">
         <div><small>כל המוצרים</small><strong>בד"ץ<br>מהדרין</strong><small>ללא פשרות</small></div>
       </div>
     </div>
   </div>
 </header>
 
-<div class="trust">
-  <div><b>כשרות מהדרין</b>כל מוצר נושא חותמת בד"ץ</div>
-  <div><b>שתי מנות לפחות</b>כל מארז מקיים את המצווה כהלכתה</div>
-  <div><b>משלוח ביום פורים</b>חלוקה בשעות היום, לפי אזור</div>
-  <div><b>הנחות כמות</b>לבתי כנסת, גנים וחברות</div>
-</div>
+<ul class="trust" aria-label="היתרונות שלנו">
+  <li><b>כשרות מהדרין</b>כל מוצר נושא חותמת בד"ץ</li>
+  <li><b>שתי מנות לפחות</b>כל מארז מקיים את המצווה כהלכתה</li>
+  <li><b>משלוח ביום פורים</b>חלוקה בשעות היום, לפי אזור</li>
+  <li><b>הנחות כמות</b>לבתי כנסת, גנים וחברות</li>
+</ul>
 
-<main>
-  <section class="wrap" id="shop">
+<main id="main">
+  <section class="wrap" id="shop" tabindex="-1" aria-labelledby="shopTitle">
     <div class="sechead">
-      <h2>המארזים שלנו</h2>
+      <h2 id="shopTitle">המארזים שלנו</h2>
       <div class="filters" id="filters" role="group" aria-label="סינון מארזים"></div>
     </div>
-    <div class="grid" id="grid"></div>
+    <div class="grid" id="grid" role="list" aria-live="polite" aria-label="רשימת המארזים"></div>
   </section>
 
   <section class="wrap" id="bulk">
@@ -186,7 +227,8 @@ footer .wrap{padding-block:28px;display:flex;justify-content:space-between;gap:1
       </div>
       <div class="tbl">
         <table>
-          <thead><tr><th>מספר מארזים</th><th>הנחה</th></tr></thead>
+          <caption class="sr">הנחות לפי כמות מארזים</caption>
+          <thead><tr><th scope="col">מספר מארזים</th><th scope="col">הנחה</th></tr></thead>
           <tbody>
             <tr><td>1–9</td><td>מחיר מלא</td></tr>
             <tr><td>10–24</td><td class="off">5%</td></tr>
@@ -197,14 +239,51 @@ footer .wrap{padding-block:28px;display:flex;justify-content:space-between;gap:1
       </div>
     </div>
   </section>
+
+  <section class="wrap a11y-page" id="accessibility" tabindex="-1" aria-labelledby="a11yTitle">
+    <h2 id="a11yTitle">הצהרת נגישות</h2>
+    <p>אנו רואים חשיבות רבה במתן שירות שוויוני לכלל הלקוחות, ובכלל זה אנשים עם מוגבלות. אתר זה נבנה בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), התשע"ג–2013, ולתקן הישראלי ת"י 5568 ברמה AA, המבוסס על הנחיות WCAG 2.0.</p>
+    <h3>מה כולל האתר</h3>
+    <ul>
+      <li>תפריט נגישות (הכפתור הכחול בפינת המסך) עם הגדלת טקסט, ניגודיות גבוהה, הדגשת קישורים, עצירת אנימציות, גופן קריא, גווני אפור וסמן מוגדל. הבחירות נשמרות לביקור הבא.</li>
+      <li>ניווט מלא במקלדת: מעבר בין כל הכפתורים והשדות באמצעות Tab, הפעלה ב-Enter, וסגירת חלונות ב-Esc. קישור "דלג לתוכן" בתחילת העמוד.</li>
+      <li>תמיכה בקוראי מסך: כותרות מסודרות, תיאור טקסטואלי לכל תמונה, תוויות לכל שדה בטופס, והודעות קוליות על הוספה לעגלה.</li>
+      <li>ניגודיות צבעים תקנית, גדלי טקסט יחסיים, והתאמה למצב כהה ולהגדרת "הפחתת תנועה" במכשיר.</li>
+      <li>הסרטונים באתר ללא פסקול, ולכן אינם דורשים כתוביות.</li>
+    </ul>
+    <h3>דרכי פנייה</h3>
+    <p>נתקלתם בקושי בגלישה? נשמח לדעת ולתקן. ניתן לפנות לרכז הנגישות שלנו בוואטסאפ או בטלפון במספר <span id="a11yPhone">+972500000000</span>, או להשאיר הודעה דרך טופס ההזמנה. נשתדל להשיב בתוך 3 ימי עסקים.</p>
+    <p><small>הצהרה זו עודכנה לאחרונה בחשוון תשפ"ז (אוקטובר 2026).</small></p>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
     <div>מנות של פורים · משלוחי מנות בכשרות בד"ץ מהדרין</div>
     <div>הזמנות אחרונות עד ט' באדר · איסוף עצמי או משלוח</div>
+    <nav aria-label="קישורים משפטיים"><a href="#accessibility">הצהרת נגישות</a></nav>
   </div>
 </footer>
+
+<button class="a11y-btn" id="a11yBtn" type="button" aria-label="פתיחת תפריט נגישות" aria-expanded="false" aria-controls="a11yMenu">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path d="M19 8.5c-2.3.6-4.6.9-7 .9s-4.7-.3-7-.9l-.5 1.9c1.7.5 3.4.8 5.1.9v3.2l-2.3 7.1 1.9.6 2.6-6.9h.4l2.6 6.9 1.9-.6-2.3-7.1v-3.2c1.7-.1 3.4-.4 5.1-.9z"/></svg>
+</button>
+<div class="a11y" id="a11yMenu" role="dialog" aria-label="תפריט נגישות" hidden>
+  <h2>נגישות <button class="x" id="a11yClose" type="button" aria-label="סגירת תפריט נגישות">×</button></h2>
+  <div class="row2">
+    <button class="opt" type="button" data-a="big">הגדלת טקסט <span class="st">A+</span></button>
+    <button class="opt" type="button" data-a="bigger">טקסט גדול מאוד <span class="st">A++</span></button>
+  </div>
+  <button class="opt" type="button" data-a="contrast">ניגודיות גבוהה <span class="st">כבוי</span></button>
+  <button class="opt" type="button" data-a="links">הדגשת קישורים וכפתורים <span class="st">כבוי</span></button>
+  <button class="opt" type="button" data-a="motion">עצירת אנימציות <span class="st">כבוי</span></button>
+  <button class="opt" type="button" data-a="font">גופן קריא <span class="st">כבוי</span></button>
+  <button class="opt" type="button" data-a="gray">גווני אפור <span class="st">כבוי</span></button>
+  <button class="opt" type="button" data-a="cursor">סמן עכבר מוגדל <span class="st">כבוי</span></button>
+  <button class="reset" type="button" id="a11yReset">איפוס הגדרות</button>
+  <a href="#accessibility" id="a11yStmt">הצהרת נגישות</a>
+</div>
+<div class="sr" id="announce" aria-live="polite" aria-atomic="true"></div>
 
 <div class="drawer" id="drawer" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
@@ -229,7 +308,7 @@ footer .wrap{padding-block:28px;display:flex;justify-content:space-between;gap:1
   </div>
 </div>
 
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 // ===== הגדרות החנות — לעדכן כאן =====
@@ -296,7 +375,7 @@ try{ cart = JSON.parse(localStorage.getItem("mm-cart")||"{}") }catch(e){ cart = 
 const save = ()=>{ try{ localStorage.setItem("mm-cart", JSON.stringify(cart)) }catch(e){} };
 
 function boxArt(p){
-  return `<svg viewBox="0 0 120 100" aria-hidden="true">
+  return `<svg viewBox="0 0 120 100" role="img" aria-label="איור של ${p.name}">
     <rect x="14" y="38" width="92" height="56" rx="6" fill="${p.box}"/>
     <rect x="8" y="26" width="104" height="18" rx="4" fill="${p.box}" opacity=".85"/>
     <rect x="54" y="26" width="12" height="68" fill="${p.color}"/>
@@ -313,18 +392,18 @@ function renderFilters(){
 function renderGrid(){
   const list = PRODUCTS.filter(p=>activeCat==="הכל"||p.cat===activeCat);
   $("#grid").innerHTML = list.map(p=>`
-    <article class="card">
+    <article class="card" role="listitem" aria-labelledby="t-${p.id}">
       <div class="art${p.img||p.video?' tall':''}" style="background:color-mix(in srgb, ${p.color} 22%, var(--surface))">
         ${p.tag?`<span class="badge">${p.tag}</span>`:""}
         ${p.img&&p.video?`<img class="photo" id="ph-${p.id}" src="${p.img}" alt="${p.name}"><video class="vid" id="vd-${p.id}" src="${p.video}" poster="${p.poster}" muted loop playsinline preload="none" hidden></video><div class="sides" role="group" aria-label="תצוגה"><button type="button" aria-pressed="true" data-view="${p.id}" data-n="1">תמונה</button><button type="button" aria-pressed="false" data-view="${p.id}" data-n="2">סרטון</button></div>`:(p.video?`<video class="vid" src="${p.video}" poster="${p.poster}" muted autoplay loop playsinline preload="metadata" aria-label="${p.name}"></video>`:"")}${p.video?"":(p.img?`<img class="photo" id="ph-${p.id}" src="${p.img}" alt="${p.name}">`:boxArt(p))}${p.img2?`<div class="sides" role="group" aria-label="צד השקית"><button type="button" aria-pressed="true" data-side="${p.id}" data-n="1">צד א</button><button type="button" aria-pressed="false" data-side="${p.id}" data-n="2">צד ב</button></div>`:""}
-        <span class="kos">בד"ץ מהדרין</span>
+        <span class="kos" aria-hidden="true">בד"ץ מהדרין</span>
       </div>
       <div class="body">
-        <h3>${p.name}</h3>
+        <h3 id="t-${p.id}">${p.name}</h3>
         <ul>${p.items.map(i=>`<li>${i}</li>`).join("")}</ul>
         <div class="row">
           <div class="price">${ils(p.price)} <small>למארז</small></div>
-          <button class="add" type="button" data-add="${p.id}">הוספה לעגלה</button>
+          <button class="add" type="button" data-add="${p.id}" aria-label="הוספת ${p.name} לעגלה, ${ils(p.price)}">הוספה לעגלה</button>
         </div>
       </div>
     </article>`).join("");
@@ -341,13 +420,13 @@ function totals(){
 
 function renderCart(){
   const t = totals();
-  $("#cartCount").textContent = t.qty;
+  $("#cartCount").textContent = t.qty; $("#cartCount").setAttribute("aria-label", t.qty+" פריטים");
   const ids = Object.keys(cart);
   $("#lines").innerHTML = ids.length ? ids.map(id=>{
     const p = PRODUCTS.find(x=>x.id===id);
     return `<div class="line">
       <div class="nm">${p.name}</div><div>${ils(p.price*cart[id])}</div>
-      <div class="qty"><button type="button" data-dec="${id}" aria-label="הפחתה">−</button><span>${cart[id]}</span><button type="button" data-inc="${id}" aria-label="הוספה">+</button></div>
+      <div class="qty"><button type="button" data-dec="${id}" aria-label="הפחתת כמות של ${p.name}">−</button><span aria-live="polite" aria-label="כמות: ${cart[id]}">${cart[id]}</span><button type="button" data-inc="${id}" aria-label="הוספת כמות של ${p.name}">+</button></div>
       <div style="color:var(--muted);font-size:.85rem">${ils(p.price)} ליחידה</div>
     </div>`}).join("") : `<div class="empty">העגלה ריקה. בחרו מארז מהרשימה.</div>`;
   $("#sum").innerHTML = ids.length ? `
@@ -367,14 +446,50 @@ document.addEventListener("click", e=>{
   if(b.dataset.view){ const id=b.dataset.view, v=document.getElementById("vd-"+id), sc=document.getElementById("ph-"+id); const vid=b.dataset.n==="2"; v.hidden=!vid; sc.hidden=vid; if(vid){v.play().catch(()=>{})}else{v.pause()} b.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); return; }
   if(b.dataset.side){ const p=PRODUCTS.find(x=>x.id===b.dataset.side); document.getElementById("ph-"+p.id).src = b.dataset.n==="2"?p.img2:p.img; b.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); return; }
   if(b.dataset.cat){ activeCat=b.dataset.cat; renderFilters(); renderGrid(); }
-  if(b.dataset.add){ cart[b.dataset.add]=(cart[b.dataset.add]||0)+1; renderCart(); toast("נוסף לעגלה"); }
+  if(b.dataset.add){ cart[b.dataset.add]=(cart[b.dataset.add]||0)+1; renderCart(); const pn=PRODUCTS.find(x=>x.id===b.dataset.add).name; toast("נוסף לעגלה"); announce(pn+" נוסף לעגלה. בעגלה כעת "+totals().qty+" פריטים"); }
   if(b.dataset.inc){ cart[b.dataset.inc]++; renderCart(); }
   if(b.dataset.dec){ if(--cart[b.dataset.dec]<=0) delete cart[b.dataset.dec]; renderCart(); }
 });
-$("#openCart").onclick = ()=>{ $("#drawer").hidden=false; };
-$("#closeCart").onclick = ()=>{ $("#drawer").hidden=true; };
-$("#drawer").addEventListener("click", e=>{ if(e.target.id==="drawer") $("#drawer").hidden=true; });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#drawer").hidden=true; });
+function announce(msg){ const a=$("#announce"); a.textContent=""; setTimeout(()=>a.textContent=msg,50); }
+let lastFocus=null;
+function openDrawer(){ lastFocus=document.activeElement; $("#drawer").hidden=false; $("#openCart").setAttribute("aria-expanded","true"); document.body.style.overflow="hidden"; setTimeout(()=>$("#closeCart").focus(),30); }
+function closeDrawer(){ if($("#drawer").hidden) return; $("#drawer").hidden=true; $("#openCart").setAttribute("aria-expanded","false"); document.body.style.overflow=""; (lastFocus||$("#openCart")).focus(); }
+$("#openCart").onclick = openDrawer;
+$("#closeCart").onclick = closeDrawer;
+$("#drawer").addEventListener("click", e=>{ if(e.target.id==="drawer") closeDrawer(); });
+// מלכודת פוקוס בתוך העגלה
+$("#drawer").addEventListener("keydown", e=>{
+  if(e.key!=="Tab") return;
+  const f=[...$("#drawer").querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>!x.hidden&&x.offsetParent!==null);
+  if(!f.length) return; const first=f[0], last=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeDrawer(); closeA11y(); } });
+
+// ===== תפריט נגישות =====
+const A11Y_KEYS=["big","bigger","contrast","links","motion","font","gray","cursor"];
+let a11y={}; try{ a11y=JSON.parse(localStorage.getItem("mm-a11y")||"{}") }catch(e){}
+function applyA11y(){
+  A11Y_KEYS.forEach(k=>document.documentElement.classList.toggle("a-"+k,!!a11y[k]));
+  document.querySelectorAll("#a11yMenu .opt").forEach(b=>{ const on=!!a11y[b.dataset.a]; b.setAttribute("aria-pressed",on); const st=b.querySelector(".st"); if(st&&!/A\+/.test(st.textContent)) st.textContent=on?"פעיל":"כבוי"; });
+  try{ localStorage.setItem("mm-a11y",JSON.stringify(a11y)) }catch(e){}
+}
+function openA11y(){ $("#a11yMenu").hidden=false; $("#a11yBtn").setAttribute("aria-expanded","true"); $("#a11yClose").focus(); }
+function closeA11y(){ if($("#a11yMenu").hidden) return; $("#a11yMenu").hidden=true; $("#a11yBtn").setAttribute("aria-expanded","false"); $("#a11yBtn").focus(); }
+$("#a11yBtn").onclick = ()=> $("#a11yMenu").hidden ? openA11y() : closeA11y();
+$("#a11yClose").onclick = closeA11y;
+$("#a11yStmt").onclick = ()=>{ closeA11y(); setTimeout(()=>$("#accessibility").focus(),50); };
+document.querySelectorAll("#a11yMenu .opt").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.a;
+  if(k==="big"){ a11y.big=!a11y.big; if(a11y.big) a11y.bigger=false; }
+  else if(k==="bigger"){ a11y.bigger=!a11y.bigger; if(a11y.bigger) a11y.big=false; }
+  else a11y[k]=!a11y[k];
+  applyA11y(); announce(b.firstChild.textContent.trim()+(a11y[k]?" הופעל":" כובה"));
+});
+$("#a11yReset").onclick = ()=>{ a11y={}; applyA11y(); announce("הגדרות הנגישות אופסו"); };
+applyA11y();
+document.querySelector(".skip").addEventListener("click", e=>{ e.preventDefault(); $("#shop").focus(); $("#shop").scrollIntoView(); });
 $("#fDelivery").onchange = renderCart;
 
 $("#orderForm").addEventListener("submit", e=>{
@@ -397,6 +512,7 @@ $("#copyBtn").onclick = ()=>{
   });
 };
 
+$("#a11yPhone").textContent = "+" + STORE_WHATSAPP;
 const days = Math.max(0, Math.ceil((PURIM - new Date())/864e5));
 $("#days").textContent = days;
 
