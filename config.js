@@ -8,5 +8,5 @@ window.SITE_CONFIG = {
   SUPABASE_ANON_KEY: "",   // המפתח הציבורי (anon / public). לא את service_role!
 
   // כתובת האתר הציבורית (לחזרה מדף התשלום)
-  SITE_URL: "https://aviavigonen-creator.github.io/avi/"
+  SITE_URL: "https://mishlohi.co.il/"
 };
