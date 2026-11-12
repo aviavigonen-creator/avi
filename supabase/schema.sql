@@ -156,10 +156,12 @@ returns json language sql security definer as $$
     'revenue',          (select coalesce(sum(total),0) from orders where created_at > now() - make_interval(days => days) and status in ('paid','paid_pending','preparing','delivered')),
     'pending',          (select count(*) from orders where status in ('new','awaiting_payment','paid_pending')),
     'by_day',           (select coalesce(json_agg(d order by d.day), '[]'::json) from (
-                           select date_trunc('day', created_at)::date as day, count(*) as visits,
-                                  (select count(*) from orders o where o.created_at::date = date_trunc('day', v.created_at)::date and o.status <> 'cancelled') as orders
-                             from visits v where created_at > now() - make_interval(days => days)
-                            group by 1) d),
+                           select v.day, v.visits, coalesce(o.orders, 0) as orders
+                             from (select created_at::date as day, count(*) as visits
+                                     from visits where created_at > now() - make_interval(days => days) group by 1) v
+                             left join (select created_at::date as day, count(*) as orders
+                                          from orders where created_at > now() - make_interval(days => days) and status <> 'cancelled' group by 1) o
+                               on o.day = v.day) d),
     'top_products',     (select coalesce(json_agg(t), '[]'::json) from (
                            select i->>'name' as name, sum((i->>'qty')::int) as qty
                              from orders, jsonb_array_elements(items) i
