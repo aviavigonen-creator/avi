@@ -75,6 +75,14 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
   <p class="muted">אחרי הרענון הבא העמוד הזה יציג מסך התחברות.</p>
 </div>
 
+<div id="setpw" class="login" hidden>
+  <h1>ברוכים הבאים לניהול</h1>
+  <p class="muted">בחרו סיסמה לפאנל הניהול (לפחות 8 תווים).</p>
+  <label>סיסמה חדשה<input id="pw1" type="password" autocomplete="new-password" dir="ltr"></label>
+  <label>אימות סיסמה<input id="pw2" type="password" autocomplete="new-password" dir="ltr"></label>
+  <button class="btn" id="pwBtn">שמירה וכניסה</button>
+  <div id="pwErr" class="err" hidden></div>
+</div>
 <div id="login" class="login" hidden>
   <h1>כניסה לניהול</h1>
   <label>מייל<input id="lEmail" type="email" autocomplete="username" dir="ltr"></label>
@@ -179,8 +187,14 @@ function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeou
 function fail(e){console.error(e);toast("שגיאה: "+(e.message||e));}
 
 // ---------- התחברות ----------
+let needPw=/type=(invite|recovery|signup)/.test(location.hash)||/type=(invite|recovery)/.test(location.search);
+sb.auth.onAuthStateChange((ev)=>{ if(ev==="PASSWORD_RECOVERY") needPw=true; });
+$("#pwBtn").onclick=async()=>{ $("#pwErr").hidden=true; const p1=$("#pw1").value,p2=$("#pw2").value; if(p1.length<8){$("#pwErr").textContent="הסיסמה קצרה מדי";$("#pwErr").hidden=false;return;} if(p1!==p2){$("#pwErr").textContent="הסיסמאות לא תואמות";$("#pwErr").hidden=false;return;} const {error}=await sb.auth.updateUser({password:p1}); if(error){$("#pwErr").textContent="שגיאה: "+error.message;$("#pwErr").hidden=false;return;} needPw=false; history.replaceState(null,"",location.pathname); toast("הסיסמה נשמרה"); boot(); };
+$("#pw2").addEventListener("keydown",e=>{if(e.key==="Enter")$("#pwBtn").click()});
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
+  if(session&&needPw){ $("#login").hidden=true; $("#app").hidden=true; $("#setpw").hidden=false; $("#pw1").focus(); return; }
+  $("#setpw").hidden=true;
   if(session){ $("#login").hidden=true; $("#app").hidden=false; await loadAll(); }
   else { $("#login").hidden=false; $("#app").hidden=true; }
 }

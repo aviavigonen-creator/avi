@@ -4,8 +4,8 @@
 // ============================================================
 window.SITE_CONFIG = {
   // מ-Supabase: Project Settings → API
-  SUPABASE_URL: "",        // למשל "https://abcdefgh.supabase.co"
-  SUPABASE_ANON_KEY: "",   // המפתח הציבורי (anon / public). לא את service_role!
+  SUPABASE_URL: "https://zkfgcreyortjanoskmya.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_TbnscS4I9oyXDXxPhtTKGg_pyuqnae8",   // מפתח ציבורי (publishable). לא את ה-secret!
 
   // כתובת האתר הציבורית (לחזרה מדף התשלום)
   SITE_URL: "https://mishlohi.co.il/"
