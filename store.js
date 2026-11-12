@@ -149,13 +149,13 @@ function App(){
       <section class="wrap a11y-page" id="accessibility" tabindex="-1" aria-labelledby="a11yT"><div class="sec-h"><h2 id="a11yT">הצהרת נגישות</h2></div>
         <p>אנו רואים חשיבות רבה במתן שירות שוויוני לכלל הלקוחות, ובכלל זה אנשים עם מוגבלות. אתר זה נבנה בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), התשע"ג–2013, ולתקן הישראלי ת"י 5568 ברמה AA.</p>
         <ul><li>תפריט נגישות (הכפתור הכחול) עם הגדלת טקסט, ניגודיות, הדגשת קישורים, עצירת אנימציות, גופן קריא, גווני אפור וסמן מוגדל.</li><li>ניווט מלא במקלדת, קישור "דלג לתוכן", Esc סוגר חלונות.</li><li>תמיכה בקוראי מסך: כותרות, תיאורי תמונה, תוויות לשדות, הודעות קוליות.</li></ul>
-        <p>נתקלתם בקושי? פנו לרכז הנגישות בוואטסאפ או בטלפון <span dir="ltr">+${S.whatsapp}</span>. נשיב בתוך 3 ימי עסקים.</p></section>
+        <p>נתקלתם בקושי? פנו לרכז הנגישות בוואטסאפ או בטלפון <span dir="ltr">+${S.whatsapp}</span>, או בכתובת רחוב הברזל, עטרות, ירושלים. נשיב בתוך 3 ימי עסקים.</p></section>
     </main>
 
     <footer><div class="wrap">
-      <div><h3>${S.store_name}</h3><p>משלוחי מנות בכשרות בד"ץ מהדרין. ${S.last_order_text}.</p>
+      <div><h3>${S.store_name}</h3><p>משלוחי מנות בכשרות בד"ץ מהדרין. ${S.last_order_text}.</p><p><b>כתובת:</b> רחוב הברזל, עטרות, ירושלים</p>
         <div class="socials"><a href=${wa} target="_blank" rel="noopener" aria-label="וואטסאפ">${I.wa}</a></div></div>
-      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
+      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
     </div><div class="copy">© ${new Date().getFullYear()} ${S.store_name} · כל הזכויות שמורות</div></footer>
 
     <a class="wa-float" href=${wa} target="_blank" rel="noopener" aria-label="צ'אט בוואטסאפ" hidden=${!!S.tawk_id}>${I.wa}</a>
@@ -269,6 +269,7 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
         ${S.pay_card_enabled&&S.pay_provider!=="none"?html`<option value="card">כרטיס אשראי (תשלום מאובטח)</option>`:html`<option value="card" disabled>כרטיס אשראי (תשלום מאובטח) – יופעל בקרוב</option>`}
         ${S.pay_cash_enabled&&html`<option value="cash">מזומן באיסוף / במסירה</option>`}<option value="whatsapp">סיכום בוואטסאפ</option></select></label>
       <label>הערות / נוסח לכרטיס ברכה<textarea rows="3" value=${f.note} onInput=${set("note")}></textarea></label>
+      <p class="terms-note">בלחיצה על "שליחת הזמנה" אני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">התקנון ומדיניות הביטול</a>.</p>
       <button class="submit" type="submit" disabled=${busy}>${busy?"שולח…":"שליחת הזמנה"}</button></form>`}
     ${done&&html`<div class="done"><b>${done.head}</b><pre>${done.text}</pre>
       ${done.url?html`<a class="paybtn" href=${done.url}>תשלום מאובטח בכרטיס אשראי ${ils(done.total)}</a>`:html`<a class="paybtn" href="#" aria-disabled="true">תשלום מאובטח בכרטיס אשראי – יופעל בקרוב</a>`}
