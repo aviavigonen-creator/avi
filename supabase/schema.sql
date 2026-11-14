@@ -227,3 +227,15 @@ insert into products (id,name,category,price,items,tag,color,sort) values
  ('tri',   'קונוס סופגנייה אדום',    'לגן ולכיתה', 11.90, '{"קונוס קרטון אדום עם הדפס מבריק","ממתקים וסוכריות","מתאים לחלוקה בגן ובכיתה"}', 'חדש', '#e03b2e', 70),
  ('lg',    'קונוס ענק חג אורים שמח', 'קונוסים', 39.99, '{"קונוס קרטון גדול עם ארבע פאות צבעוניות","חלונות סביבונים נ.ג.ה.פ","מלא בממתקים וסוכריות","מתאים למתנה גדולה לילד"}', 'חדש', '#8cc63f', 80)
 on conflict (id) do nothing;
+-- מנויי התראות פוש של אפליקציית הניהול
+create table if not exists push_subscriptions (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  endpoint    text not null unique,
+  keys        jsonb not null,            -- {p256dh, auth}
+  user_email  text,
+  device      text
+);
+alter table push_subscriptions enable row level security;
+drop policy if exists "admin manage push" on push_subscriptions;
+create policy "admin manage push" on push_subscriptions for all to authenticated using (true) with check (true);

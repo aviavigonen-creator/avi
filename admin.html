@@ -130,7 +130,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
 </div>
 
 <div id="app" hidden>
-  <div class="top"><h1>ניהול · <span id="storeName">מנות של פורים</span></h1><span class="sp"></span><a href="./" target="_blank" rel="noopener">האתר</a><button id="logout" type="button">יציאה</button></div>
+  <div class="top"><h1>ניהול · <span id="storeName">מנות של פורים</span></h1><span class="sp"></span><button id="pushBtn" type="button" hidden>🔔 הפעל התראות</button><a href="./" target="_blank" rel="noopener">האתר</a><button id="logout" type="button">יציאה</button></div>
   <div class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-tab="dash">לוח בקרה</button>
     <button role="tab" aria-selected="false" data-tab="orders">הזמנות <span id="pendingBadge"></span></button>
@@ -216,7 +216,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=7"></script>
+<script src="config.js?v=11"></script>
 <script>
 (function(){
 "use strict";
@@ -254,7 +254,26 @@ $("#logout").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
 $$(".tabs button").forEach(b=>b.onclick=()=>{ $$(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b)); $$(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.tab)); });
 
 let SETTINGS={}, PRODUCTS=[], ORDERS=[];
-async function loadAll(){ await Promise.all([loadSettings(),loadStats(),loadOrders(),loadProducts(),loadCallbacks()]); }
+async function loadAll(){ await Promise.all([loadSettings(),loadStats(),loadOrders(),loadProducts(),loadCallbacks()]); pushInit(); const h=location.hash.replace("#",""); if(["orders","callbacks","products","settings","pay"].includes(h)) $(`.tabs button[data-tab="${h}"]`)?.click(); }
+
+// ---------- התראות פוש (אפליקציית הניהול בטלפון) ----------
+const VAPID_PUBLIC=(CFG.VAPID_PUBLIC_KEY||"");
+const b64ToU8=s=>{const p="=".repeat((4-s.length%4)%4);const b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0));};
+async function pushInit(){
+  const btn=$("#pushBtn"); if(!("serviceWorker" in navigator)||!("PushManager" in window)||!VAPID_PUBLIC){ btn.hidden=true; return; }
+  try{ await navigator.serviceWorker.register("admin-sw.js"); }catch(e){ console.warn(e); btn.hidden=true; return; }
+  const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.getSubscription();
+  btn.hidden=false;
+  if(sub&&Notification.permission==="granted"){ btn.textContent="🔔 התראות פעילות"; btn.disabled=true; await savePush(sub); }
+  else btn.textContent="🔔 הפעל התראות";
+  btn.onclick=async()=>{ try{
+    const perm=await Notification.requestPermission(); if(perm!=="granted"){ toast("ההתראות נחסמו בדפדפן. אפשר לאפשר בהגדרות האתר."); return; }
+    const s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToU8(VAPID_PUBLIC)});
+    await savePush(s); btn.textContent="🔔 התראות פעילות"; btn.disabled=true; toast("ההתראות הופעלו במכשיר הזה");
+    reg.showNotification("ההתראות פעילות",{body:"ככה תיראה התראה על הזמנה חדשה.",icon:"media/admin-icon.png",dir:"rtl",lang:"he"});
+  }catch(e){ fail(e); } };
+}
+async function savePush(sub){ const j=sub.toJSON(); const {data:{user}}=await sb.auth.getUser(); await sb.from("push_subscriptions").upsert({endpoint:j.endpoint,keys:j.keys,user_email:user?.email||null,device:navigator.userAgent.slice(0,120)},{onConflict:"endpoint"}); }
 
 // ---------- פניות "חזרו אליי" ----------
 let CALLBACKS=[];
