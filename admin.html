@@ -29,7 +29,8 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
 th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:.8rem;color:var(--muted)}
 tr:hover td{background:color-mix(in srgb,var(--line) 35%,transparent)}
 .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;white-space:nowrap}
-.s-new{background:#e8f0fe;color:#1a56c9}.s-awaiting_payment{background:#fff4d6;color:#8a6500}.s-paid_pending{background:#fff0c2;color:#7a5a00}.s-paid{background:#dff5ea;color:#116645}.s-preparing{background:#efe3ff;color:#5b2d99}.s-delivered{background:#e6e6e6;color:#444}.s-cancelled{background:#fde2e0;color:#9a1c14}
+.s-new{background:#e8f0fe;color:#1a56c9}.s-confirmed{background:#d9f2e3;color:#0f6a3a}.s-rejected{background:#fde2e0;color:#9a1c14}
+.act2{display:flex;gap:6px;flex-wrap:wrap}.act2 .btn{white-space:nowrap}.s-awaiting_payment{background:#fff4d6;color:#8a6500}.s-paid_pending{background:#fff0c2;color:#7a5a00}.s-paid{background:#dff5ea;color:#116645}.s-preparing{background:#efe3ff;color:#5b2d99}.s-delivered{background:#e6e6e6;color:#444}.s-cancelled{background:#fde2e0;color:#9a1c14}
 @media (prefers-color-scheme:dark){.pill{filter:brightness(.85) saturate(1.2)}}
 .btn{background:var(--wine);color:#fff;border:0;border-radius:9px;padding:8px 14px;font-weight:700;cursor:pointer}
 .btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--line)}.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}.btn.sm{padding:5px 10px;font-size:.85rem}
@@ -111,8 +112,8 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
 
     <!-- הזמנות -->
     <section class="panel" id="p-orders">
-      <div class="box"><h2>הזמנות <span class="row"><input id="oSearch" placeholder="חיפוש: שם, טלפון, מס' הזמנה" style="width:240px"><select id="oStatus" style="width:auto"><option value="">כל הסטטוסים</option><option value="new">חדשה</option><option value="awaiting_payment">ממתינה לתשלום</option><option value="paid_pending">שולם – לאימות</option><option value="paid">שולם</option><option value="preparing">בהכנה</option><option value="delivered">נמסר</option><option value="cancelled">בוטל</option></select><button class="btn sec sm" id="oCsv">ייצוא CSV</button><button class="btn sec sm" id="oRefresh">רענון</button></span></h2>
-        <div class="tbl"><table id="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="box"><h2>הזמנות <span class="row"><input id="oSearch" placeholder="חיפוש: שם, טלפון, מס' הזמנה" style="width:240px"><select id="oStatus" style="width:auto"><option value="">כל הסטטוסים</option><option value="new">חדשה</option><option value="confirmed">אושרה</option><option value="rejected">נדחתה</option><option value="awaiting_payment">ממתינה לתשלום</option><option value="paid_pending">שולם – לאימות</option><option value="paid">שולם</option><option value="preparing">בהכנה</option><option value="delivered">נמסר</option><option value="cancelled">בוטל</option></select><button class="btn sec sm" id="oCsv">ייצוא CSV</button><button class="btn sec sm" id="oRefresh">רענון</button></span></h2>
+        <div class="tbl"><table id="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th>אישור</th><th></th></tr></thead><tbody></tbody></table></div>
       </div>
     </section>
 
@@ -181,7 +182,9 @@ const sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
 const ils=n=>"₪"+Number(n||0).toLocaleString("he-IL",{maximumFractionDigits:2});
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmtDate=d=>new Date(d).toLocaleString("he-IL",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-const STATUS={new:"חדשה",awaiting_payment:"ממתינה לתשלום",paid_pending:"שולם – לאימות",paid:"שולם",preparing:"בהכנה",delivered:"נמסר",cancelled:"בוטל"};
+const STATUS={new:"חדשה",confirmed:"אושרה",rejected:"נדחתה",awaiting_payment:"ממתינה לתשלום",paid_pending:"שולם – לאימות",paid:"שולם",preparing:"בהכנה",delivered:"נמסר",cancelled:"בוטל"};
+const PENDING=["new","awaiting_payment","paid_pending"];
+const waNum=p=>p.replace(/\D/g,"").replace(/^0/,"972");
 const PAY={card:"אשראי",cash:"מזומן",whatsapp:"וואטסאפ"};
 function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2200);}
 function fail(e){console.error(e);toast("שגיאה: "+(e.message||e));}
@@ -236,11 +239,27 @@ function renderOrders(){
     <td><pre class="items">${o.items.map(i=>`${i.name} × ${i.qty}`).join("\n")}</pre></td>
     <td><b>${ils(o.total)}</b></td><td>${PAY[o.payment_method]||o.payment_method}${o.payment_ref?`<br><small dir="ltr">${esc(o.payment_ref)}</small>`:""}</td>
     <td><select data-st="${o.id}" class="pill s-${o.status}" style="border:0;width:auto">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===o.status?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><button class="btn sec sm" data-view="${o.id}">פרטים</button></td></tr>`).join("")||`<tr><td colspan="8" class="muted">אין הזמנות תואמות.</td></tr>`;
+    <td>${PENDING.includes(o.status)?`<div class="act2"><button class="btn ok sm" data-ok="${o.id}">✓ אישור</button><button class="btn bad sm" data-no="${o.id}">✗ סירוב</button></div>`
+        :o.status==="confirmed"?`<a class="btn sec sm" target="_blank" rel="noopener" href="https://wa.me/${waNum(o.phone)}?text=${encodeURIComponent(`שלום ${o.customer_name}, הזמנה ${o.order_no} אושרה! סה"כ ${ils(o.total)}. ${o.delivery==="ship"?"המשלוח יגיע עד 5 ימי עסקים.":"נעדכן כשההזמנה מוכנה לאיסוף."} תודה, ${SETTINGS.store_name||""}`)}">וואטסאפ אישור</a>`
+        :o.status==="rejected"?`<a class="btn sec sm" target="_blank" rel="noopener" href="https://wa.me/${waNum(o.phone)}?text=${encodeURIComponent(`שלום ${o.customer_name}, לצערנו לא נוכל לספק את הזמנה ${o.order_no}. ${o.admin_note?"סיבה: "+o.admin_note+". ":""}אם שולם, הסכום יוחזר במלואו. מתנצלים, ${SETTINGS.store_name||""}`)}">וואטסאפ דחייה</a>`:""}</td>
+    <td><button class="btn sec sm" data-view="${o.id}">פרטים</button></td></tr>`).join("")||`<tr><td colspan="9" class="muted">אין הזמנות תואמות.</td></tr>`;
 }
 $("#oSearch").oninput=renderOrders; $("#oStatus").onchange=renderOrders; $("#oRefresh").onclick=loadOrders;
 $("#orders").addEventListener("change",async e=>{ const s=e.target.closest("[data-st]"); if(!s) return; const {error}=await sb.from("orders").update({status:s.value}).eq("id",s.dataset.st); if(error) return fail(error); s.className="pill s-"+s.value; toast("הסטטוס עודכן"); loadStats(); });
-$("#orders").addEventListener("click",e=>{ const b=e.target.closest("[data-view]"); if(b) openOrder(ORDERS.find(o=>o.id==b.dataset.view)); });
+$("#orders").addEventListener("click",async e=>{
+  const v=e.target.closest("[data-view]"); if(v) return openOrder(ORDERS.find(o=>o.id==v.dataset.view));
+  const ok=e.target.closest("[data-ok]"); if(ok){ const {error}=await sb.from("orders").update({status:"confirmed"}).eq("id",ok.dataset.ok); if(error) return fail(error); toast("ההזמנה אושרה"); await loadOrders(); loadStats(); return; }
+  const no=e.target.closest("[data-no]"); if(no){ const o=ORDERS.find(x=>x.id==no.dataset.no); openReject(o); }
+});
+function openReject(o){
+  openEditor(`<h2>סירוב הזמנה ${o.order_no}</h2><p>${esc(o.customer_name)} · <span dir="ltr">${esc(o.phone)}</span> · ${ils(o.total)}</p>
+    <label>סיבת הסירוב (תישמר כהערה פנימית ותופיע בהודעה ללקוח)<select id="rjReason"><option>אזל המלאי</option><option>מחוץ לאזור המשלוחים</option><option>לא ניתן לספק במועד המבוקש</option><option>פרטי הזמנה שגויים / לא ניתן ליצור קשר</option><option>הזמנת בדיקה / כפולה</option><option value="other">אחר</option></select></label>
+    <label>פירוט (לא חובה)<textarea id="rjNote" rows="2"></textarea></label>
+    <div class="row"><button class="btn bad" id="rjGo">סירוב ההזמנה</button><button class="btn sec" id="rjCancel">ביטול</button></div>`);
+  $("#rjCancel").onclick=closeEditor;
+  $("#rjGo").onclick=async()=>{ const r=$("#rjReason").value==="other"?"":$("#rjReason").value; const note=[r,$("#rjNote").value.trim()].filter(Boolean).join(" – ")||null;
+    const {error}=await sb.from("orders").update({status:"rejected",admin_note:note}).eq("id",o.id); if(error) return fail(error); closeEditor(); toast("ההזמנה נדחתה"); await loadOrders(); loadStats(); };
+}
 function openOrder(o){
   openEditor(`<h2>הזמנה ${o.order_no}</h2>
     <div class="box"><b>${esc(o.customer_name)}</b> · <span dir="ltr">${esc(o.phone)}</span>${o.email?` · <span dir="ltr">${esc(o.email)}</span>`:""}<br>${esc(o.city||"")}${o.address?", "+esc(o.address):""} · ${o.delivery==="ship"?"משלוח עד הבית":"איסוף עצמי"}<br><small class="muted">${new Date(o.created_at).toLocaleString("he-IL")}</small></div>

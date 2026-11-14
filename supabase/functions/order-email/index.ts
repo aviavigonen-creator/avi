@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     const o = payload.record;
     if (!o) return new Response("no record", { status: 400 });
     const isNew = payload.type === "INSERT";
-    const becamePaid = payload.type === "UPDATE" && o.status === "paid" && payload.old_record?.status !== "paid";
+    const becamePaid = payload.type === "UPDATE" && ["paid","confirmed"].includes(o.status) && !["paid","confirmed"].includes(payload.old_record?.status);
     if (!isNew && !becamePaid) return new Response("skip");
 
     const { data: store } = await sb.from("settings").select("store_name,whatsapp,contact_email").eq("id", 1).single();
