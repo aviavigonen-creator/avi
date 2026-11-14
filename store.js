@@ -114,7 +114,7 @@ function App(){
       <div>
         <h1>ברוכים הבאים לעולם של <em>${S.store_name}</em></h1>
         <p>${S.hero_sub||"מארזי משלוח מנות לכל תקציב: למשפחה, לשכנים, לגננת ולעובדים. כל המוצרים בכשרות מהדרין בלבד, ואנחנו דואגים למשלוח עד הדלת."}</p>
-        <div class="hero-cta"><a class="btn yellow" href="#shop">לכל המארזים</a><a class="btn ghost" href="#bulk">הזמנה למוסדות</a><button class="btn ghost" type="button" onClick=${()=>setCb(true)}>חזרו אליי</button></div>
+        <div class="hero-cta"><a class="btn yellow" href="#shop">לכל המארזים</a><a class="btn ghost" href="#bulk">הזמנה למוסדות</a></div>
       </div>
       <div class="seal" role="img" aria-label=${"חותמת: כל המוצרים בהשגחת בד״ץ מהדרין. עד פורים נשארו "+days+" ימים"}><div><small>כל המוצרים</small><strong>בד"ץ<br/>מהדרין</strong><span class="cnt">עד פורים <b>${days}</b> ימים</span></div></div>
     </div></div>
@@ -156,7 +156,7 @@ function App(){
     <footer><div class="wrap">
       <div><h3>${S.store_name}</h3><p>משלוחי מנות בכשרות בד"ץ מהדרין. ${S.last_order_text}.</p><p><b>כתובת:</b> רחוב הברזל, עטרות, ירושלים</p>
         <div class="socials"><a href=${wa} target="_blank" rel="noopener" aria-label="וואטסאפ">${I.wa}</a></div></div>
-      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a><a href="#" onClick=${e=>{e.preventDefault();setCb(true)}}>בקשה שנחזור אליכם</a></nav>
+      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
     </div><div class="copy">© ${new Date().getFullYear()} ${S.store_name} · כל הזכויות שמורות</div></footer>
 
     <a class="wa-float" href=${wa} target="_blank" rel="noopener" aria-label="צ'אט בוואטסאפ" hidden=${!!S.tawk_id}>${I.wa}</a>
