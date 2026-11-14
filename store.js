@@ -52,6 +52,7 @@ function App(){
   const [open,setOpen]=useState(false);
   const [view,setView]=useState(null);       // מוצר לפרטים
   const [notice,setNotice]=useState(null);   // {title,ok,cancel,resolve}
+  const [cb,setCb]=useState(false);          // טופס "חזרו אליי"
   const [banner,setBanner]=useState(null);
   const [toastMsg,setToastS]=useState(null);const toastT=useRef(null);
   const [a11yOpen,setA11yOpen]=useState(false);
@@ -113,7 +114,7 @@ function App(){
       <div>
         <h1>ברוכים הבאים לעולם של <em>${S.store_name}</em></h1>
         <p>${S.hero_sub||"מארזי משלוח מנות לכל תקציב: למשפחה, לשכנים, לגננת ולעובדים. כל המוצרים בכשרות מהדרין בלבד, ואנחנו דואגים למשלוח עד הדלת."}</p>
-        <div class="hero-cta"><a class="btn yellow" href="#shop">לכל המארזים</a><a class="btn ghost" href="#bulk">הזמנה למוסדות</a></div>
+        <div class="hero-cta"><a class="btn yellow" href="#shop">לכל המארזים</a><a class="btn ghost" href="#bulk">הזמנה למוסדות</a><button class="btn ghost" type="button" onClick=${()=>setCb(true)}>חזרו אליי</button></div>
       </div>
       <div class="seal" role="img" aria-label=${"חותמת: כל המוצרים בהשגחת בד״ץ מהדרין. עד פורים נשארו "+days+" ימים"}><div><small>כל המוצרים</small><strong>בד"ץ<br/>מהדרין</strong><span class="cnt">עד פורים <b>${days}</b> ימים</span></div></div>
     </div></div>
@@ -155,7 +156,7 @@ function App(){
     <footer><div class="wrap">
       <div><h3>${S.store_name}</h3><p>משלוחי מנות בכשרות בד"ץ מהדרין. ${S.last_order_text}.</p><p><b>כתובת:</b> רחוב הברזל, עטרות, ירושלים</p>
         <div class="socials"><a href=${wa} target="_blank" rel="noopener" aria-label="וואטסאפ">${I.wa}</a></div></div>
-      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
+      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a><a href="#" onClick=${e=>{e.preventDefault();setCb(true)}}>בקשה שנחזור אליכם</a></nav>
     </div><div class="copy">© ${new Date().getFullYear()} ${S.store_name} · כל הזכויות שמורות</div></footer>
 
     <a class="wa-float" href=${wa} target="_blank" rel="noopener" aria-label="צ'אט בוואטסאפ" hidden=${!!S.tawk_id}>${I.wa}</a>
@@ -163,6 +164,7 @@ function App(){
     ${a11yOpen&&html`<${A11yMenu} a11y=${a11y} setA11y=${setA11y} close=${()=>setA11yOpen(false)} announce=${announce}/>`}
     ${open&&html`<${Cart} S=${S} P=${P} cart=${cart} setCart=${setCart} close=${()=>setOpen(false)} toast=${toast} announce=${announce} showNotice=${showNotice}/>`}
     ${view&&html`<${ProductModal} p=${view} add=${add} close=${()=>setView(null)}/>`}
+    ${cb&&html`<${Callback} S=${S} close=${()=>setCb(false)} toast=${toast} announce=${announce}/>`}
     ${notice&&html`<${Notice} n=${notice} onOk=${()=>closeNotice(true)} onCancel=${()=>closeNotice(false)}/>`}
     ${toastMsg&&html`<div class="toast" role="status">${toastMsg}</div>`}
     <div class="sr" ref=${liveRef} aria-live="polite" aria-atomic="true"></div>`;
@@ -180,6 +182,30 @@ function Grid({items,add,view,sides,setSides}){
       <div class="b"><h3 id=${"t-"+p.id}>${p.name}</h3><div class="price">${ils(p.price)}</div>
         <div class="act">${out?html`<span class="soldout">אזל המלאי</span>`:html`<button class="more" type="button" onClick=${()=>view(p)}>לפרטים ולהזמנה</button><button class="plus" type="button" aria-label=${"הוספת "+p.name+" לעגלה, "+ils(p.price)} onClick=${()=>add(p)}>+</button>`}</div>
       </div></article>`})}</div>`;
+}
+
+function Callback({S,close,toast,announce}){
+  const [f,setF]=useState({name:"",phone:"",message:""});const [busy,setBusy]=useState(false);const [done,setDone]=useState(false);
+  const ref=useRef(null);useEffect(()=>{ref.current?.focus()},[]);
+  const set=k=>e=>setF(o=>({...o,[k]:e.target.value}));
+  const submit=async e=>{e.preventDefault();const name=f.name.trim(),phone=f.phone.replace(/[^\d+]/g,"");
+    if(!name||phone.length<9){toast("נא למלא שם וטלפון תקין");return}
+    setBusy(true);let ok=false;
+    if(DB_ON){try{const {error}=await sb.from("callbacks").insert({name,phone,message:f.message.trim()||null,source:"site",visitor_id:visitorId()});ok=!error;if(error)console.warn(error)}catch(e){}}
+    setBusy(false);setDone(true);announce("הבקשה נשלחה. נחזור אליך בהקדם.");
+    if(!ok){/* גיבוי: פתיחת וואטסאפ עם הפרטים */ window.open(`https://wa.me/${S.whatsapp}?text=${encodeURIComponent(`שלום, אשמח שתחזרו אליי.\nשם: ${name}\nטלפון: ${phone}${f.message.trim()?`\n${f.message.trim()}`:""}`)}`,"_blank");}
+  };
+  return html`<div class="modal" onClick=${e=>{if(e.target.classList.contains("modal"))close()}}><div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="cbT" style=${{textAlign:"right"}}>
+    <h2 id="cbT" style=${{textAlign:"center"}}>${done?"קיבלנו!":"רוצים שנחזור אליכם?"}</h2>
+    ${done?html`<p style=${{textAlign:"center"}}>תודה ${f.name.trim()}, נחזור אליך בהקדם למספר <span dir="ltr">${f.phone}</span>.</p><div class="modal-actions"><button class="submit" type="button" onClick=${close}>סגירה</button></div>`
+    :html`<p style=${{textAlign:"center",color:"var(--muted)",fontSize:".95rem"}}>השאירו פרטים ונחזור אליכם בהקדם, בוואטסאפ או בטלפון.</p>
+    <form onSubmit=${submit} noValidate>
+      <label>שם<input ref=${ref} value=${f.name} onInput=${set("name")} required autocomplete="name"/></label>
+      <label>טלפון<input value=${f.phone} onInput=${set("phone")} required type="tel" inputmode="tel" autocomplete="tel"/></label>
+      <label>במה נוכל לעזור? (לא חובה)<textarea rows="3" value=${f.message} onInput=${set("message")} placeholder="למשל: הזמנה של 40 מארזים לבית הכנסת"></textarea></label>
+      <button class="submit" type="submit" disabled=${busy}>${busy?"שולח…":"שלחו לי הודעה"}</button>
+      <button class="x-text" type="button" onClick=${close}>ביטול</button></form>`}
+  </div></div>`;
 }
 
 function ProductModal({p,add,close}){

@@ -90,6 +90,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
   #orders td:nth-child(9){grid-column:1/-1}
   #orders td:nth-child(9) .btn{width:100%;padding:10px}
   #orders td[colspan]{grid-column:1/-1}
+  #callbacks{display:block}#callbacks thead{display:none}#callbacks tbody{display:grid;gap:10px}#callbacks tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}#callbacks td{border:0;padding:2px 0}#callbacks td:nth-child(4),#callbacks td:nth-child(7){grid-column:1/-1}#callbacks td:nth-child(7) .btn{width:100%;padding:12px;font-size:1rem}
   .drawer .in{width:100%}
   .cards{grid-template-columns:1fr 1fr}
   .tabs{padding:6px 8px 0}.tabs button{padding:10px 10px;font-size:.9rem}
@@ -133,6 +134,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
   <div class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-tab="dash">לוח בקרה</button>
     <button role="tab" aria-selected="false" data-tab="orders">הזמנות <span id="pendingBadge"></span></button>
+    <button role="tab" aria-selected="false" data-tab="callbacks">פניות <span id="cbBadge"></span></button>
     <button role="tab" aria-selected="false" data-tab="products">מוצרים</button>
     <button role="tab" aria-selected="false" data-tab="settings">הגדרות האתר</button>
     <button role="tab" aria-selected="false" data-tab="pay">תשלום וצ'אט</button>
@@ -150,6 +152,13 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
     <section class="panel" id="p-orders">
       <div class="box"><h2>הזמנות <span class="row"><input id="oSearch" placeholder="חיפוש: שם, טלפון, מס' הזמנה" style="width:240px"><select id="oStatus" style="width:auto"><option value="">כל הסטטוסים</option><option value="new">חדשה</option><option value="confirmed">אושרה</option><option value="rejected">נדחתה</option><option value="awaiting_payment">ממתינה לתשלום</option><option value="paid_pending">שולם – לאימות</option><option value="paid">שולם</option><option value="preparing">בהכנה</option><option value="delivered">נמסר</option><option value="cancelled">בוטל</option></select><button class="btn sec sm" id="oCsv">ייצוא CSV</button><button class="btn sec sm" id="oRefresh">רענון</button></span></h2>
         <div class="tbl"><table id="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th>אישור</th><th></th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- פניות -->
+    <section class="panel" id="p-callbacks">
+      <div class="box"><h2>בקשות "חזרו אליי" <span class="row"><select id="cbFilter" style="width:auto"><option value="new">ממתינות</option><option value="handled">טופלו</option><option value="">הכול</option></select><button class="btn sec sm" id="cbRefresh">רענון</button></span></h2>
+        <div class="tbl"><table id="callbacks"><thead><tr><th>זמן</th><th>שם</th><th>טלפון</th><th>הודעה</th><th>מקור</th><th>סטטוס</th><th></th></tr></thead><tbody></tbody></table></div>
       </div>
     </section>
 
@@ -245,7 +254,29 @@ $("#logout").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
 $$(".tabs button").forEach(b=>b.onclick=()=>{ $$(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b)); $$(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.tab)); });
 
 let SETTINGS={}, PRODUCTS=[], ORDERS=[];
-async function loadAll(){ await Promise.all([loadSettings(),loadStats(),loadOrders(),loadProducts()]); }
+async function loadAll(){ await Promise.all([loadSettings(),loadStats(),loadOrders(),loadProducts(),loadCallbacks()]); }
+
+// ---------- פניות "חזרו אליי" ----------
+let CALLBACKS=[];
+async function loadCallbacks(){
+  const {data,error}=await sb.from("callbacks").select("*").order("created_at",{ascending:false}).limit(300); if(error){ if(/callbacks/.test(error.message)) return; return fail(error); }
+  CALLBACKS=data; renderCallbacks(); const n=data.filter(c=>c.status==="new").length; $("#cbBadge").textContent=n?`(${n})`:"";
+}
+function renderCallbacks(){
+  const f=$("#cbFilter").value; const list=CALLBACKS.filter(c=>!f||c.status===f);
+  $("#callbacks tbody").innerHTML=list.map(c=>`<tr>
+    <td>${fmtDate(c.created_at)}</td><td><b>${esc(c.name)}</b></td>
+    <td><a href="https://wa.me/${waNum(c.phone)}?text=${encodeURIComponent(`שלום ${c.name}, מדברים מ${SETTINGS.store_name||"החנות"}, חוזרים אליך בעקבות הפנייה באתר.`)}" target="_blank" rel="noopener" dir="ltr">${esc(c.phone)}</a></td>
+    <td>${esc(c.message||"")}</td><td>${c.source==="site"?"האתר":esc(c.source||"")}</td>
+    <td><span class="pill ${c.status==="new"?"s-new":"s-delivered"}">${c.status==="new"?"ממתינה":"טופלה"}</span></td>
+    <td>${c.status==="new"?`<button class="btn ok sm" data-cbdone="${c.id}">✓ טופל</button>`:`<button class="btn sec sm" data-cbreopen="${c.id}">פתח מחדש</button>`}</td></tr>`).join("")||`<tr><td colspan="7" class="muted">אין פניות.</td></tr>`;
+}
+$("#cbFilter").onchange=renderCallbacks; $("#cbRefresh").onclick=loadCallbacks;
+$("#callbacks").addEventListener("click",async e=>{
+  const d=e.target.closest("[data-cbdone]"), r=e.target.closest("[data-cbreopen]");
+  if(d){ const {error}=await sb.from("callbacks").update({status:"handled",handled_at:new Date().toISOString()}).eq("id",d.dataset.cbdone); if(error) return fail(error); toast("סומן כטופל"); loadCallbacks(); }
+  if(r){ const {error}=await sb.from("callbacks").update({status:"new",handled_at:null}).eq("id",r.dataset.cbreopen); if(error) return fail(error); loadCallbacks(); }
+});
 
 // ---------- לוח בקרה ----------
 async function loadStats(){
