@@ -61,6 +61,7 @@ label{display:grid;gap:4px;font-weight:600;font-size:.9rem}
 code{background:color-mix(in srgb,var(--line) 60%,transparent);padding:2px 6px;border-radius:5px;direction:ltr;unicode-bidi:embed}
 pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(--muted)}
 [hidden]{display:none!important}
+.ohead{margin:4px 0 6px;font-size:1.05rem}
 .muted{color:var(--muted)}
 .dir{direction:ltr;text-align:left}
 /* ---- מובייל: הזמנות ככרטיסים ---- */
@@ -70,26 +71,26 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
   .box h2{font-size:1rem}
   .box h2 .row{width:100%}
   #oSearch{width:100%!important}
-  #orders{display:block}
-  #orders thead{display:none}
-  #orders tbody{display:grid;gap:10px}
-  #orders tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-  #orders tr:hover td{background:none}
-  #orders td{border:0;padding:2px 0;display:block}
-  #orders td:nth-child(1){font-size:1.05rem}
-  #orders td:nth-child(2){text-align:left;color:var(--muted);font-size:.85rem}
-  #orders td:nth-child(3){grid-column:1/-1}
-  #orders td:nth-child(4){grid-column:1/-1;background:color-mix(in srgb,var(--line) 35%,transparent);border-radius:8px;padding:6px 8px}
-  #orders td:nth-child(5)::before{content:"סה\"כ: ";color:var(--muted)}
-  #orders td:nth-child(6)::before{content:"תשלום: ";color:var(--muted)}
-  #orders td:nth-child(7){grid-column:1/-1}
-  #orders td:nth-child(7) select{width:100%;padding:8px 10px;font-size:.95rem}
-  #orders td:nth-child(8){grid-column:1/-1}
-  #orders td:nth-child(8) .act2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  #orders td:nth-child(8) .btn{padding:12px;font-size:1rem;width:100%;text-align:center}
-  #orders td:nth-child(9){grid-column:1/-1}
-  #orders td:nth-child(9) .btn{width:100%;padding:10px}
-  #orders td[colspan]{grid-column:1/-1}
+  .orders{display:block}
+  .orders thead{display:none}
+  .orders tbody{display:grid;gap:10px}
+  .orders tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .orders tr:hover td{background:none}
+  .orders td{border:0;padding:2px 0;display:block}
+  .orders td:nth-child(1){font-size:1.05rem}
+  .orders td:nth-child(2){text-align:left;color:var(--muted);font-size:.85rem}
+  .orders td:nth-child(3){grid-column:1/-1}
+  .orders td:nth-child(4){grid-column:1/-1;background:color-mix(in srgb,var(--line) 35%,transparent);border-radius:8px;padding:6px 8px}
+  .orders td:nth-child(5)::before{content:"סה\"כ: ";color:var(--muted)}
+  .orders td:nth-child(6)::before{content:"תשלום: ";color:var(--muted)}
+  .orders td:nth-child(7){grid-column:1/-1}
+  .orders td:nth-child(7) select{width:100%;padding:8px 10px;font-size:.95rem}
+  .orders td:nth-child(8){grid-column:1/-1}
+  .orders td:nth-child(8) .act2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .orders td:nth-child(8) .btn{padding:12px;font-size:1rem;width:100%;text-align:center}
+  .orders td:nth-child(9){grid-column:1/-1}
+  .orders td:nth-child(9) .btn{width:100%;padding:10px}
+  .orders td[colspan]{grid-column:1/-1}
   #callbacks{display:block}#callbacks thead{display:none}#callbacks tbody{display:grid;gap:10px}#callbacks tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}#callbacks td{border:0;padding:2px 0}#callbacks td:nth-child(4),#callbacks td:nth-child(7){grid-column:1/-1}#callbacks td:nth-child(7) .btn{width:100%;padding:12px;font-size:1rem}
   .drawer .in{width:100%}
   .cards{grid-template-columns:1fr 1fr}
@@ -151,7 +152,11 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
     <!-- הזמנות -->
     <section class="panel" id="p-orders">
       <div class="box"><h2>הזמנות <span class="row"><input id="oSearch" placeholder="חיפוש: שם, טלפון, מס' הזמנה" style="width:240px"><select id="oStatus" style="width:auto"><option value="">כל הסטטוסים</option><option value="new">חדשה</option><option value="confirmed">אושרה</option><option value="rejected">נדחתה</option><option value="awaiting_payment">ממתינה לתשלום</option><option value="paid_pending">שולם – לאימות</option><option value="paid">שולם</option><option value="preparing">בהכנה</option><option value="delivered">נמסר</option><option value="cancelled">בוטל</option></select><button class="btn sec sm" id="oCsv">ייצוא CSV</button><button class="btn sec sm" id="oRefresh">רענון</button></span></h2>
-        <div class="tbl"><table id="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th>אישור</th><th></th></tr></thead><tbody></tbody></table></div>
+        <h3 class="ohead">💳 הזמנות באשראי – שולמו <span id="cntCard" class="muted"></span></h3>
+        <p class="muted" style="margin:0 0 8px">מוצגות רק הזמנות שהתשלום בכרטיס אשראי הושלם. הזמנות שננטשו לפני התשלום אינן מוצגות.</p>
+        <div class="tbl"><table id="orders" class="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th>אישור</th><th></th></tr></thead><tbody></tbody></table></div>
+        <h3 class="ohead" style="margin-top:22px">💵 הזמנות במזומן / וואטסאפ – לאישורך <span id="cntCash" class="muted"></span></h3>
+        <div class="tbl"><table id="ordersCash" class="orders"><thead><tr><th>מס'</th><th>תאריך</th><th>לקוח</th><th>פריטים</th><th>סה"כ</th><th>תשלום</th><th>סטטוס</th><th>אישור</th><th></th></tr></thead><tbody></tbody></table></div>
       </div>
     </section>
 
@@ -216,7 +221,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=11"></script>
+<script src="config.js?v=13"></script>
 <script>
 (function(){
 "use strict";
@@ -313,13 +318,22 @@ $("#range").onchange=loadStats;
 async function loadOrders(){
   const {data,error}=await sb.from("orders").select("*").order("created_at",{ascending:false}).limit(500); if(error) return fail(error);
   ORDERS=data; renderOrders();
-  const pend=data.filter(o=>["new","awaiting_payment","paid_pending"].includes(o.status)).length;
+  const pend=data.filter(visibleOrder).filter(o=>["new","awaiting_payment","paid_pending"].includes(o.status)).length;
   $("#pendingBadge").textContent=pend?`(${pend})`:"";
 }
 function renderOrders(){
   const q=$("#oSearch").value.trim(), st=$("#oStatus").value;
-  const list=ORDERS.filter(o=>(!st||o.status===st)&&(!q||[o.order_no,o.customer_name,o.phone,o.city].join(" ").includes(q)));
-  $("#orders tbody").innerHTML=list.map(o=>`<tr>
+  const vis=ORDERS.filter(visibleOrder);
+  const list=vis.filter(o=>(!st||o.status===st)&&(!q||[o.order_no,o.customer_name,o.phone,o.city].join(" ").includes(q)));
+  const card=list.filter(o=>o.payment_method==="card"), cash=list.filter(o=>o.payment_method!=="card");
+  $("#cntCard").textContent=`(${card.length})`; $("#cntCash").textContent=`(${cash.length})`;
+  $("#orders tbody").innerHTML=rowsHtml(card); $("#ordersCash tbody").innerHTML=rowsHtml(cash);
+}
+// הזמנה באשראי מוצגת רק אחרי שהסליקה הושלמה (או טופלה ידנית); מזומן/וואטסאפ – תמיד
+const CARD_UNPAID=["awaiting_payment","new"];
+function visibleOrder(o){ return o.payment_method!=="card"||!CARD_UNPAID.includes(o.status); }
+function rowsHtml(list){
+  return list.map(o=>`<tr>
     <td><b>${o.order_no}</b></td><td>${fmtDate(o.created_at)}</td>
     <td>${esc(o.customer_name)}<br><a href="https://wa.me/${o.phone.replace(/\D/g,"").replace(/^0/,"972")}" target="_blank" rel="noopener" dir="ltr">${esc(o.phone)}</a><br><small class="muted">${esc(o.city||"")} · ${o.delivery==="ship"?"משלוח":"איסוף"}</small></td>
     <td><pre class="items">${o.items.map(i=>`${i.name} × ${i.qty}`).join("\n")}</pre></td>
@@ -331,8 +345,8 @@ function renderOrders(){
     <td><button class="btn sec sm" data-view="${o.id}">פרטים</button></td></tr>`).join("")||`<tr><td colspan="9" class="muted">אין הזמנות תואמות.</td></tr>`;
 }
 $("#oSearch").oninput=renderOrders; $("#oStatus").onchange=renderOrders; $("#oRefresh").onclick=loadOrders;
-$("#orders").addEventListener("change",async e=>{ const s=e.target.closest("[data-st]"); if(!s) return; const {error}=await sb.from("orders").update({status:s.value}).eq("id",s.dataset.st); if(error) return fail(error); s.className="pill s-"+s.value; toast("הסטטוס עודכן"); loadStats(); });
-$("#orders").addEventListener("click",async e=>{
+for(const T of ["#orders","#ordersCash"]) $(T).addEventListener("change",async e=>{ const s=e.target.closest("[data-st]"); if(!s) return; const {error}=await sb.from("orders").update({status:s.value}).eq("id",s.dataset.st); if(error) return fail(error); s.className="pill s-"+s.value; toast("הסטטוס עודכן"); loadStats(); });
+for(const T of ["#orders","#ordersCash"]) $(T).addEventListener("click",async e=>{
   const v=e.target.closest("[data-view]"); if(v) return openOrder(ORDERS.find(o=>o.id==v.dataset.view));
   const ok=e.target.closest("[data-ok]"); if(ok){ const {error}=await sb.from("orders").update({status:"confirmed"}).eq("id",ok.dataset.ok); if(error) return fail(error); toast("ההזמנה אושרה"); await loadOrders(); loadStats(); return; }
   const no=e.target.closest("[data-no]"); if(no){ const o=ORDERS.find(x=>x.id==no.dataset.no); openReject(o); }
@@ -359,7 +373,7 @@ function openOrder(o){
   $("#eDel").onclick=async()=>{ if($("#eDel").dataset.sure!=="1"){ $("#eDel").dataset.sure="1"; $("#eDel").textContent="לחצו שוב לאישור המחיקה"; return; } const {error}=await sb.from("orders").delete().eq("id",o.id); if(error) return fail(error); closeEditor(); toast("נמחק"); loadOrders(); loadStats(); };
 }
 $("#oCsv").onclick=()=>{
-  const rows=[["מס'","תאריך","שם","טלפון","מייל","עיר","קבלה","פריטים","סכום ביניים","הנחה","משלוח","סה\"כ","תשלום","סטטוס","הערה"]].concat(ORDERS.map(o=>[o.order_no,new Date(o.created_at).toLocaleString("he-IL"),o.customer_name,o.phone,o.email||"",o.city||"",o.delivery,o.items.map(i=>`${i.name} x${i.qty}`).join(" | "),o.subtotal,o.discount,o.shipping,o.total,PAY[o.payment_method]||o.payment_method,STATUS[o.status]||o.status,o.note||""]));
+  const rows=[["מס'","תאריך","שם","טלפון","מייל","עיר","קבלה","פריטים","סכום ביניים","הנחה","משלוח","סה\"כ","תשלום","סטטוס","הערה"]].concat(ORDERS.filter(visibleOrder).map(o=>[o.order_no,new Date(o.created_at).toLocaleString("he-IL"),o.customer_name,o.phone,o.email||"",o.city||"",o.delivery,o.items.map(i=>`${i.name} x${i.qty}`).join(" | "),o.subtotal,o.discount,o.shipping,o.total,PAY[o.payment_method]||o.payment_method,STATUS[o.status]||o.status,o.note||""]));
   const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
   const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download="orders.csv"; a.click();
 };

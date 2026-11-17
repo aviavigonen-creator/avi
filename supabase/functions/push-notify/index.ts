@@ -17,13 +17,17 @@ const ils = (n: number) => "₪" + Number(n).toLocaleString("he-IL", { maximumFr
 Deno.serve(async (req) => {
   try {
     const p = await req.json();
-    if (p.type !== "INSERT" || !p.record) return new Response("skip");
+    if (!p.record) return new Response("skip");
     const r = p.record;
     let payload: any;
     if (p.table === "orders") {
+      // אשראי: התראה רק כשהתשלום הושלם (UPDATE ל-paid). מזומן/וואטסאפ: התראה בכניסת ההזמנה.
+      const paidNow = ["paid", "paid_pending"].includes(r.status) && !["paid", "paid_pending"].includes(p.old_record?.status);
+      if (r.payment_method === "card" ? !paidNow : p.type !== "INSERT") return new Response("skip");
       const n = (r.items ?? []).reduce((a: number, i: any) => a + Number(i.qty || 0), 0);
-      payload = { title: `🛒 הזמנה חדשה ${r.order_no} · ${ils(r.total)}`, body: `${r.customer_name} · ${r.phone} · ${n} מארזים · ${r.delivery === "ship" ? "משלוח" : "איסוף"}${r.note ? " · " + r.note : ""}`, tag: "order-" + r.id, url: SITE + "admin.html#orders" };
+      payload = { title: `${r.payment_method === "card" ? "💳 הזמנה שולמה" : "🛒 הזמנה חדשה"} ${r.order_no} · ${ils(r.total)}`, body: `${r.customer_name} · ${r.phone} · ${n} מארזים · ${r.delivery === "ship" ? "משלוח" : "איסוף"}${r.note ? " · " + r.note : ""}`, tag: "order-" + r.id, url: SITE + "admin.html#orders" };
     } else if (p.table === "callbacks") {
+      if (p.type !== "INSERT") return new Response("skip");
       payload = { title: `📞 ${r.name} מבקש/ת שיחזרו אליו`, body: `${r.phone}${r.message ? " · " + r.message : ""}`, tag: "cb-" + r.id, url: SITE + "admin.html#callbacks" };
     } else return new Response("skip");
 
