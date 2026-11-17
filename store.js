@@ -274,7 +274,7 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
     const go=await showNotice({title:"לפני שמסיימים: זמני אספקה",ok:"אישור ושליחת ההזמנה",cancel:true});if(!go)return;
     const order={customer_name:name,phone,email:email||null,city:f.city,delivery:f.delivery,note:f.note.trim()||null,items:ids.map(id=>({id,name:byId(id).name,price:byId(id).price,qty:cart[id]})),subtotal:+sub.toFixed(2),discount:+disc.toFixed(2),shipping:+ship.toFixed(2),total:+total.toFixed(2),payment_method:f.pay,status:f.pay==="card"?"awaiting_payment":"new",visitor_id:visitorId()};
     setBusy(true);let saved=null;
-    if(DB_ON){try{const {data,error}=await sb.from("orders").insert(order).select("order_no,id").single();if(error)throw error;saved=data}catch(err){console.warn(err);if(/[\u0590-\u05FF]/.test(err?.message||"")){toast(err.message);announce(err.message);setBusy(false);return}}}
+    if(DB_ON){try{const {data,error}=await sb.rpc("place_order",{p:order});if(error)throw error;saved=data;if(saved){order.subtotal=saved.subtotal;order.discount=saved.discount;order.shipping=saved.shipping;order.total=saved.total;if(Array.isArray(saved.items))order.items=saved.items;}}catch(err){console.warn(err);if(/[\u0590-\u05FF]/.test(err?.message||"")){toast(err.message);announce(err.message);setBusy(false);return}}}
     order.order_no=saved?.order_no||null;
     let url=paymentUrl(S,order), payErr=null;
     if(url==="payplus"){
