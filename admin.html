@@ -2,6 +2,9 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://zkfgcreyortjanoskmya.supabase.co; media-src 'self' https://zkfgcreyortjanoskmya.supabase.co; connect-src 'self' https://zkfgcreyortjanoskmya.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#7a1846">
@@ -241,7 +244,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=15"></script>
+<script src="config.js?v=16"></script>
 <script>
 (function(){
 "use strict";
@@ -325,7 +328,7 @@ $("#callbacks").addEventListener("click",async e=>{
 // ---------- לוח בקרה ----------
 async function loadStats(){
   const days=+$("#range").value;
-  const {data,error}=await sb.rpc("dashboard_stats",{days}); if(error) return fail(error);
+  const {data,error}=await sb.rpc("dashboard_stats_guarded",{days}); if(error) return fail(error);
   const conv=data.unique_visitors?(100*data.orders/data.unique_visitors).toFixed(1):"0";
   $("#stats").innerHTML=[["כניסות",data.visits],["מבקרים ייחודיים",data.unique_visitors],["הזמנות",data.orders],["אחוז המרה",conv+"%"],["הכנסות (שולם)",ils(data.revenue)],["ממתינות לטיפול",data.pending]].map(([k,v])=>`<div class="stat"><small>${k}</small><b>${v}</b></div>`).join("");
   const by=data.by_day||[]; const mx=Math.max(1,...by.map(d=>d.visits));
@@ -356,7 +359,7 @@ function rowsHtml(list){
   return list.map(o=>`<tr>
     <td><b>${o.order_no}</b></td><td>${fmtDate(o.created_at)}</td>
     <td>${esc(o.customer_name)}<br><a href="https://wa.me/${o.phone.replace(/\D/g,"").replace(/^0/,"972")}" target="_blank" rel="noopener" dir="ltr">${esc(o.phone)}</a><br><small class="muted">${esc(o.city||"")} · ${o.delivery==="ship"?"משלוח":"איסוף"}</small></td>
-    <td><pre class="items">${o.items.map(i=>`${i.name} × ${i.qty}`).join("\n")}</pre></td>
+    <td><pre class="items">${o.items.map(i=>`${esc(i.name)} × ${+i.qty||0}`).join("\n")}</pre></td>
     <td><b>${ils(o.total)}</b></td><td>${PAY[o.payment_method]||o.payment_method}${o.payment_ref?`<br><small dir="ltr">${esc(o.payment_ref)}</small>`:""}</td>
     <td><select data-st="${o.id}" class="pill s-${o.status}" style="border:0;width:auto">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===o.status?"selected":""}>${v}</option>`).join("")}</select></td>
     <td>${PENDING.includes(o.status)?`<div class="act2"><button class="btn ok sm" data-ok="${o.id}">✓ אישור</button><button class="btn bad sm" data-no="${o.id}">✗ סירוב</button></div>`
@@ -370,7 +373,7 @@ function renderHesit(){
   $("#hesit tbody").innerHTML=list.map(o=>`<tr>
     <td><b>${o.order_no}</b></td><td>${fmtDate(o.created_at)}</td>
     <td>${esc(o.customer_name)}<br><a href="https://wa.me/${waNum(o.phone)}" target="_blank" rel="noopener" dir="ltr">${esc(o.phone)}</a><br><small class="muted">${esc(o.city||"")} · ${o.delivery==="ship"?"משלוח":"איסוף"}</small></td>
-    <td><pre class="items">${o.items.map(i=>`${i.name} × ${i.qty}`).join("\n")}</pre></td>
+    <td><pre class="items">${o.items.map(i=>`${esc(i.name)} × ${+i.qty||0}`).join("\n")}</pre></td>
     <td><b>${ils(o.total)}</b></td><td>${PAY[o.payment_method]||o.payment_method}</td>
     <td><span class="pill s-awaiting_payment">לא השלים תשלום</span></td>
     <td><a class="btn sec sm" target="_blank" rel="noopener" href="https://wa.me/${waNum(o.phone)}?text=${encodeURIComponent(`שלום ${o.customer_name}, ראינו שהתחלת הזמנה ${o.order_no} (${ils(o.total)}) אצלנו ולא הושלם התשלום. נשמח לעזור לך לסיים אותה או לענות על כל שאלה 😊 ${SETTINGS.store_name||""}`)}">וואטסאפ מעקב</a></td>
@@ -382,7 +385,7 @@ function renderTrash(){
   $("#trash tbody").innerHTML=TRASH.map(o=>`<tr>
     <td><b>${o.order_no}</b></td><td>${fmtDate(o.created_at)}</td>
     <td>${esc(o.customer_name)}<br><span dir="ltr">${esc(o.phone)}</span><br><small class="muted">${esc(o.city||"")} · ${o.delivery==="ship"?"משלוח":"איסוף"}</small></td>
-    <td><pre class="items">${o.items.map(i=>`${i.name} × ${i.qty}`).join("\n")}</pre></td>
+    <td><pre class="items">${o.items.map(i=>`${esc(i.name)} × ${+i.qty||0}`).join("\n")}</pre></td>
     <td><b>${ils(o.total)}</b></td><td>${PAY[o.payment_method]||o.payment_method}</td>
     <td><span class="pill s-${o.status}">${STATUS[o.status]||o.status}</span></td>
     <td>${fmtDate(o.deleted_at)}</td>

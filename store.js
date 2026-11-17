@@ -68,9 +68,9 @@ function App(){
   useEffect(()=>{(async()=>{
     if(DB_ON){try{const [{data:st},{data:pr}]=await Promise.all([sb.from("settings").select("*").eq("id",1).maybeSingle(),sb.from("products").select("*").eq("visible",true).order("sort")]);if(st)setS({...DEFAULT_S,...st});if(pr&&pr.length)setP(pr);}catch(e){}}
     const u=new URLSearchParams(location.search);
-    if(u.get("paid")){let ok=false;if(DB_ON){try{const {data}=await sb.rpc("mark_paid",{p_order_no:u.get("paid"),p_phone:u.get("ph")||"",p_ref:u.get("ref")||null});ok=!!data}catch(e){}}
-      setBanner(`תודה! התשלום על הזמנה ${u.get("paid")} התקבל${ok?"":" (ממתין לאימות)"}. נשלח לכם אישור ונעדכן על המשלוח.`);setCart({});history.replaceState(null,"",location.pathname);}
-    else if(u.get("failed")){setBanner(`התשלום על הזמנה ${u.get("failed")} לא הושלם. אפשר לנסות שוב או לכתוב לנו בוואטסאפ.`);history.replaceState(null,"",location.pathname);}
+    if(u.get("paid")){const no=String(u.get("paid")).replace(/[^A-Za-z0-9]/g,"").slice(0,12);
+      setBanner(`תודה! התשלום על הזמנה ${no} התקבל ואישור הסליקה מתעדכן אצלנו אוטומטית. נשלח לכם אישור ונעדכן על המשלוח.`);setCart({});history.replaceState(null,"",location.pathname);}
+    else if(u.get("failed")){setBanner(`התשלום על הזמנה ${String(u.get("failed")).replace(/[^A-Za-z0-9]/g,"").slice(0,12)} לא הושלם. אפשר לנסות שוב או לכתוב לנו בוואטסאפ.`);history.replaceState(null,"",location.pathname);}
     else{let seen=false;try{seen=sessionStorage.getItem("mm-notice")==="1"}catch(e){} if(!seen){await showNotice({});try{sessionStorage.setItem("mm-notice","1")}catch(e){}}}
     if(DB_ON){try{const k="mm-visit-"+new Date().toISOString().slice(0,13);if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,"1");await sb.from("visits").insert({visitor_id:visitorId(),path:location.pathname,referrer:document.referrer||null,device:/Mobi|Android/i.test(navigator.userAgent)?"mobile":"desktop"})}}catch(e){}}
   })()},[]);
@@ -274,7 +274,7 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
     const go=await showNotice({title:"לפני שמסיימים: זמני אספקה",ok:"אישור ושליחת ההזמנה",cancel:true});if(!go)return;
     const order={customer_name:name,phone,email:email||null,city:f.city,delivery:f.delivery,note:f.note.trim()||null,items:ids.map(id=>({id,name:byId(id).name,price:byId(id).price,qty:cart[id]})),subtotal:+sub.toFixed(2),discount:+disc.toFixed(2),shipping:+ship.toFixed(2),total:+total.toFixed(2),payment_method:f.pay,status:f.pay==="card"?"awaiting_payment":"new",visitor_id:visitorId()};
     setBusy(true);let saved=null;
-    if(DB_ON){try{const {data,error}=await sb.from("orders").insert(order).select("order_no,id").single();if(error)throw error;saved=data}catch(err){console.warn(err)}}
+    if(DB_ON){try{const {data,error}=await sb.from("orders").insert(order).select("order_no,id").single();if(error)throw error;saved=data}catch(err){console.warn(err);if(/[\u0590-\u05FF]/.test(err?.message||"")){toast(err.message);announce(err.message);setBusy(false);return}}}
     order.order_no=saved?.order_no||null;
     let url=paymentUrl(S,order), payErr=null;
     if(url==="payplus"){
