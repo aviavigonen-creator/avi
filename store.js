@@ -156,7 +156,7 @@ function App(){
     <footer><div class="wrap">
       <div><h3>${S.store_name}</h3><p>משלוחי מנות בכשרות בד"ץ מהדרין. ${S.last_order_text}.</p><p><b>כתובת:</b> רחוב הברזל, עטרות, ירושלים</p>
         <div class="socials"><a href=${wa} target="_blank" rel="noopener" aria-label="וואטסאפ">${I.wa}</a></div></div>
-      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
+      <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href="terms.html#privacy">מדיניות פרטיות</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
     </div><div class="copy">© ${new Date().getFullYear()} ${S.store_name} · כל הזכויות שמורות</div></footer>
 
     <a class="wa-float" href=${wa} target="_blank" rel="noopener" aria-label="צ'אט בוואטסאפ" hidden=${!!S.tawk_id}>${I.wa}</a>
@@ -254,7 +254,7 @@ function orderText(o){
 }
 
 function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
-  const [f,setF]=useState({name:"",phone:"",email:"",city:S.cities[0]||"",delivery:"ship",pay:(S.pay_card_enabled&&S.pay_provider!=="none")?"card":S.pay_cash_enabled?"cash":"whatsapp",note:""});
+  const [f,setF]=useState({name:"",phone:"",email:"",city:S.cities[0]||"",delivery:"ship",pay:(S.pay_card_enabled&&S.pay_provider!=="none")?"card":S.pay_cash_enabled?"cash":"whatsapp",note:"",agree:false});
   const [busy,setBusy]=useState(false);const [done,setDone]=useState(null);
   const panel=useRef(null),first=useRef(null);
   useEffect(()=>{first.current?.focus()},[]);
@@ -270,6 +270,7 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
     const name=f.name.trim(),phone=f.phone.replace(/[^\d+]/g,""),email=f.email.trim();
     if(!name||phone.length<9){toast("נא למלא שם וטלפון תקין");return}
     if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){toast("כתובת מייל לא תקינה");return}
+    if(!f.agree){toast("יש לאשר את התקנון ומדיניות הפרטיות כדי להמשיך");announce("יש לאשר את התקנון ומדיניות הפרטיות");return}
     const go=await showNotice({title:"לפני שמסיימים: זמני אספקה",ok:"אישור ושליחת ההזמנה",cancel:true});if(!go)return;
     const order={customer_name:name,phone,email:email||null,city:f.city,delivery:f.delivery,note:f.note.trim()||null,items:ids.map(id=>({id,name:byId(id).name,price:byId(id).price,qty:cart[id]})),subtotal:+sub.toFixed(2),discount:+disc.toFixed(2),shipping:+ship.toFixed(2),total:+total.toFixed(2),payment_method:f.pay,status:f.pay==="card"?"awaiting_payment":"new",visitor_id:visitorId()};
     setBusy(true);let saved=null;
@@ -303,7 +304,8 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
         ${S.pay_card_enabled&&S.pay_provider!=="none"?html`<option value="card">כרטיס אשראי (תשלום מאובטח)</option>`:html`<option value="card" disabled>כרטיס אשראי (תשלום מאובטח) – יופעל בקרוב</option>`}
         ${S.pay_cash_enabled&&html`<option value="cash">מזומן באיסוף / במסירה</option>`}<option value="whatsapp">סיכום בוואטסאפ</option></select></label>
       <label>הערות / נוסח לכרטיס ברכה<textarea rows="3" value=${f.note} onInput=${set("note")}></textarea></label>
-      <p class="terms-note">בלחיצה על "שליחת הזמנה" אני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">התקנון ומדיניות הביטול</a>.</p>
+      <label class="agree"><input type="checkbox" checked=${f.agree} onChange=${e=>setF(v=>({...v,agree:e.target.checked}))} required aria-required="true"/><span>קראתי ואני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">התקנון ומדיניות הביטול</a> ואת <a href="terms.html#privacy" target="_blank" rel="noopener">מדיניות הפרטיות</a>.</span></label>
+      <p class="terms-note">המחירים כוללים מע"מ. אספקה עד 5 ימי עסקים. ניתן לבטל עסקה בהתאם לחוק הגנת הצרכן – פירוט בתקנון.</p>
       <button class="submit" type="submit" disabled=${busy}>${busy?"שולח…":"שליחת הזמנה"}</button></form>`}
     ${done&&html`<div class="done"><b>${done.head}</b><pre>${done.text}</pre>
       ${done.url?html`<a class="paybtn" href=${done.url}>תשלום מאובטח בכרטיס אשראי ${ils(done.total)}</a><small class="muted" style=${{textAlign:"center"}}>מעבירים אותך לדף התשלום המאובטח…</small>`:done.payErr?html`<div class="banner" style=${{borderRadius:"12px"}}>${done.payErr}</div>`:html`<a class="paybtn" href="#" aria-disabled="true">תשלום מאובטח בכרטיס אשראי – יופעל בקרוב</a>`}
