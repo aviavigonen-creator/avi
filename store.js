@@ -254,7 +254,7 @@ function orderText(o){
 }
 
 function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
-  const [f,setF]=useState({name:"",phone:"",email:"",city:S.cities[0]||"",delivery:"ship",pay:S.pay_cash_enabled?"cash":"whatsapp",note:""});
+  const [f,setF]=useState({name:"",phone:"",email:"",city:S.cities[0]||"",delivery:"ship",pay:(S.pay_card_enabled&&S.pay_provider!=="none")?"card":S.pay_cash_enabled?"cash":"whatsapp",note:""});
   const [busy,setBusy]=useState(false);const [done,setDone]=useState(null);
   const panel=useRef(null),first=useRef(null);
   useEffect(()=>{first.current?.focus()},[]);
