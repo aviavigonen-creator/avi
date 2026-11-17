@@ -207,6 +207,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
           <label>תאריך פורים (לספירה לאחור)<input name="purim_date" type="date"></label>
           <label>דמי משלוח (₪)<input name="shipping_fee" type="number" step="0.1" min="0"></label>
           <label>משלוח חינם מעל (₪, ריק = אין)<input name="free_shipping_min" type="number" step="1" min="0"></label>
+          <label>מינימום יחידות להזמנה<input name="min_order_qty" type="number" step="1" min="1"></label>
           <label class="full">ערים למשלוח (מופרדות בפסיק)<input name="cities"></label>
           <label class="full">הנחות כמות (כמות:אחוז, מופרד בפסיק)<input name="discount_tiers" dir="ltr" placeholder="10:5, 25:10, 50:15"></label>
           <label class="full">כותרת ראשית<input name="hero_title"></label>
@@ -244,7 +245,7 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=16"></script>
+<script src="config.js?v=17"></script>
 <script>
 (function(){
 "use strict";

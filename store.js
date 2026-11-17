@@ -11,7 +11,7 @@ const DB_ON=!!(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase);
 const sb=DB_ON?window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY):null;
 const EMB=window.EMBEDDED_IMAGES||{};
 
-const DEFAULT_S={store_name:"מנות של פורים",whatsapp:"972500000000",shipping_fee:25,free_shipping_min:null,
+const DEFAULT_S={store_name:"מנות של פורים",whatsapp:"972500000000",shipping_fee:25,free_shipping_min:null,min_order_qty:20,
   discount_tiers:[{min:10,pct:5},{min:25,pct:10},{min:50,pct:15}],cities:["ירושלים","מבשרת ציון","בית שמש","מודיעין","בני ברק","אחר"],
   purim_date:"2027-03-23",last_order_text:"הזמנות אחרונות עד ט' באדר",banner_text:null,hero_title:null,hero_sub:null,
   pay_card_enabled:false,pay_provider:"none",pay_terminal:"",pay_link_template:"",pay_cash_enabled:true,tawk_id:"",ga_id:""};
@@ -92,7 +92,7 @@ function App(){
 
   return html`
     <a class="skip" href="#shop" onClick=${e=>{e.preventDefault();document.getElementById("shop").focus();document.getElementById("shop").scrollIntoView()}}>דלג לתוכן הראשי</a>
-    <div class="ticker" aria-label="הודעות"><div class="ticker-in"><span>🚚 משלוחים לכל הארץ עד 5 ימי עסקים</span><span>✡️ כל המוצרים בכשרות בד"ץ מהדרין</span><span>🎉 הנחות כמות לבתי כנסת, גנים וחברות</span><span>⏳ עד פורים נשארו ${days} ימים</span></div></div>
+    <div class="ticker" aria-label="הודעות"><div class="ticker-in"><span>📦 מינימום הזמנה ${Math.max(1,Number(S.min_order_qty)||1)} יחידות (ניתן לשלב מוצרים)</span><span>🚚 משלוחים לכל הארץ עד 5 ימי עסקים</span><span>✡️ כל המוצרים בכשרות בד"ץ מהדרין</span><span>🎉 הנחות כמות לבתי כנסת, גנים וחברות</span><span>⏳ עד פורים נשארו ${days} ימים</span></div></div>
     ${banner&&html`<div class="banner" role="status">${banner}</div>`}
     <header class="hdr" role="banner"><div class="wrap">
       <div class="side l">
@@ -263,13 +263,14 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
   const qty=ids.reduce((a,id)=>a+cart[id],0),sub=ids.reduce((a,id)=>a+byId(id).price*cart[id],0);
   let rate=0;for(const t of S.discount_tiers)if(qty>=t.min)rate=t.pct/100;
   const disc=sub*rate;let ship=qty&&f.delivery==="ship"?Number(S.shipping_fee):0;if(S.free_shipping_min&&sub-disc>=Number(S.free_shipping_min))ship=0;
-  const total=sub-disc+ship;
+  const total=sub-disc+ship;const minQ=Math.max(1,Number(S.min_order_qty)||1),belowMin=qty>0&&qty<minQ;
   const set=k=>e=>setF(o=>({...o,[k]:e.target.value}));
   const trap=e=>{if(e.key!=="Tab")return;const els=[...panel.current.querySelectorAll('button,[href],input,select,textarea')].filter(x=>!x.hidden&&x.offsetParent!==null);if(!els.length)return;const a=els[0],z=els[els.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}};
   const submit=async e=>{e.preventDefault();
     const name=f.name.trim(),phone=f.phone.replace(/[^\d+]/g,""),email=f.email.trim();
     if(!name||phone.length<9){toast("נא למלא שם וטלפון תקין");return}
     if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){toast("כתובת מייל לא תקינה");return}
+    if(belowMin){toast(`מינימום הזמנה הוא ${minQ} יחידות. בעגלה כרגע ${qty}.`);announce(`מינימום הזמנה הוא ${minQ} יחידות`);return}
     if(!f.agree){toast("יש לאשר את התקנון ומדיניות הפרטיות כדי להמשיך");announce("יש לאשר את התקנון ומדיניות הפרטיות");return}
     const go=await showNotice({title:"לפני שמסיימים: זמני אספקה",ok:"אישור ושליחת ההזמנה",cancel:true});if(!go)return;
     const order={customer_name:name,phone,email:email||null,city:f.city,delivery:f.delivery,note:f.note.trim()||null,items:ids.map(id=>({id,name:byId(id).name,price:byId(id).price,qty:cart[id]})),subtotal:+sub.toFixed(2),discount:+disc.toFixed(2),shipping:+ship.toFixed(2),total:+total.toFixed(2),payment_method:f.pay,status:f.pay==="card"?"awaiting_payment":"new",visitor_id:visitorId()};
@@ -293,7 +294,8 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
     ${ids.length?ids.map(id=>{const p=byId(id);const m=media(p);return html`<div class="line" key=${id}><div class="ci"><div class="thumb">${m.img?html`<img src=${m.img} alt="" loading="lazy"/>`:m.video?html`<video src=${m.video} poster=${m.poster} muted playsinline preload="metadata" aria-hidden="true"></video>`:null}</div><b>${p.name}</b></div><div>${ils(p.price*cart[id])}</div>
       <div class="qty"><button type="button" aria-label=${"הפחתת כמות של "+p.name} onClick=${()=>setCart(c=>{const n={...c};if(--n[id]<=0)delete n[id];return n})}>−</button><span aria-live="polite">${cart[id]}</span><button type="button" aria-label=${"הוספת כמות של "+p.name} onClick=${()=>setCart(c=>({...c,[id]:c[id]+1}))}>+</button></div>
       <div style=${{color:"var(--muted)",fontSize:".85rem"}}>${ils(p.price)} ליחידה</div></div>`}):html`<div class="empty">העגלה ריקה. בחרו מארז מהרשימה.</div>`}
-    ${ids.length>0&&html`<div class="sum"><div><span>סכום ביניים (${qty} מארזים)</span><span>${ils(sub)}</span></div>${rate>0&&html`<div class="disc"><span>הנחת כמות ${rate*100}%</span><span>−${ils(disc)}</span></div>`}<div><span>משלוח</span><span>${ship?ils(ship):"ללא"}</span></div><div class="tot"><span>לתשלום</span><span>${ils(total)}</span></div></div>`}
+    ${ids.length>0&&html`<div class="sum"><div><span>סכום ביניים (${qty} מארזים)</span><span>${ils(sub)}</span></div>${rate>0&&html`<div class="disc"><span>הנחת כמות ${rate*100}%</span><span>−${ils(disc)}</span></div>`}<div><span>משלוח</span><span>${ship?ils(ship):"ללא"}</span></div><div class="tot"><span>לתשלום</span><span>${ils(total)}</span></div></div>
+      ${belowMin&&html`<div class="minq" role="status">מינימום הזמנה: <b>${minQ} יחידות</b> (אפשר לשלב מוצרים שונים). בעגלה כרגע ${qty} – חסרות עוד ${minQ-qty}.</div>`}`}
     ${ids.length>0&&!done&&html`<form onSubmit=${submit} noValidate>
       <label>שם מלא<input value=${f.name} onInput=${set("name")} required autocomplete="name"/></label>
       <label>טלפון<input value=${f.phone} onInput=${set("phone")} required type="tel" inputmode="tel" autocomplete="tel"/></label>
@@ -306,7 +308,7 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
       <label>הערות / נוסח לכרטיס ברכה<textarea rows="3" value=${f.note} onInput=${set("note")}></textarea></label>
       <label class="agree"><input type="checkbox" checked=${f.agree} onChange=${e=>setF(v=>({...v,agree:e.target.checked}))} required aria-required="true"/><span>קראתי ואני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">התקנון ומדיניות הביטול</a> ואת <a href="terms.html#privacy" target="_blank" rel="noopener">מדיניות הפרטיות</a>.</span></label>
       <p class="terms-note">המחירים כוללים מע"מ. אספקה עד 5 ימי עסקים. ניתן לבטל עסקה בהתאם לחוק הגנת הצרכן – פירוט בתקנון.</p>
-      <button class="submit" type="submit" disabled=${busy}>${busy?"שולח…":"שליחת הזמנה"}</button></form>`}
+      <button class="submit" type="submit" disabled=${busy||belowMin} aria-disabled=${belowMin}>${busy?"שולח…":belowMin?`מינימום ${minQ} יחידות להזמנה`:"שליחת הזמנה"}</button></form>`}
     ${done&&html`<div class="done"><b>${done.head}</b><pre>${done.text}</pre>
       ${done.url?html`<a class="paybtn" href=${done.url}>תשלום מאובטח בכרטיס אשראי ${ils(done.total)}</a><small class="muted" style=${{textAlign:"center"}}>מעבירים אותך לדף התשלום המאובטח…</small>`:done.payErr?html`<div class="banner" style=${{borderRadius:"12px"}}>${done.payErr}</div>`:html`<a class="paybtn" href="#" aria-disabled="true">תשלום מאובטח בכרטיס אשראי – יופעל בקרוב</a>`}
       <button class="cp" type="button" onClick=${copy}>העתקת פרטי ההזמנה</button><small>מספר להזמנות: <span dir="ltr">+${S.whatsapp}</span></small></div>`}
