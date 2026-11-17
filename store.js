@@ -243,6 +243,7 @@ function paymentUrl(S,order){
   const sum=order.total.toFixed(2),name=encodeURIComponent(order.customer_name),phone=encodeURIComponent(order.phone);
   const base=(CFG.SITE_URL||location.href.split("?")[0]);
   const back=encodeURIComponent(base+`?paid=${order.order_no}&ph=${order.phone}`),fail=encodeURIComponent(base+`?failed=${order.order_no}`);
+  if(S.pay_card_enabled&&S.pay_provider==="payplus") return "payplus";
   if(S.pay_card_enabled&&S.pay_provider==="tranzila"&&S.pay_terminal) return `https://direct.tranzila.com/${encodeURIComponent(S.pay_terminal)}/iframenew.php?sum=${sum}&currency=1&cred_type=1&lang=il&contact=${name}&phone=${phone}&pdesc=${encodeURIComponent("הזמנה "+order.order_no)}&myorder=${order.order_no}&success_url_address=${back}&fail_url_address=${fail}`;
   if(S.pay_card_enabled&&S.pay_provider==="link"&&S.pay_link_template) return S.pay_link_template.replace("{sum}",sum).replace("{order}",order.order_no).replace("{name}",name).replace("{phone}",phone);
   return null;
@@ -273,10 +274,17 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
     const order={customer_name:name,phone,email:email||null,city:f.city,delivery:f.delivery,note:f.note.trim()||null,items:ids.map(id=>({id,name:byId(id).name,price:byId(id).price,qty:cart[id]})),subtotal:+sub.toFixed(2),discount:+disc.toFixed(2),shipping:+ship.toFixed(2),total:+total.toFixed(2),payment_method:f.pay,status:f.pay==="card"?"awaiting_payment":"new",visitor_id:visitorId()};
     setBusy(true);let saved=null;
     if(DB_ON){try{const {data,error}=await sb.from("orders").insert(order).select("order_no,id").single();if(error)throw error;saved=data}catch(err){console.warn(err)}}
-    setBusy(false);order.order_no=saved?.order_no||null;
-    const url=paymentUrl(S,order);
+    order.order_no=saved?.order_no||null;
+    let url=paymentUrl(S,order), payErr=null;
+    if(url==="payplus"){
+      url=null;
+      if(saved&&DB_ON){ try{ const {data,error}=await sb.functions.invoke("payplus-link",{body:{order_id:saved.id,phone}}); if(error) throw error; url=data?.url||null; if(!url) throw new Error(data?.error||"no url"); }catch(err){ console.warn(err); payErr="לא הצלחנו לפתוח את דף התשלום כרגע. אפשר לנסות שוב או לשלם בדרך אחרת, ואנחנו ניצור קשר."; } }
+      else payErr="לא ניתן לפתוח דף תשלום בלי חיבור למערכת ההזמנות.";
+    }
+    setBusy(false);
     const head=order.payment_method==="card"?(order.order_no?`הזמנה ${order.order_no} נקלטה. עכשיו לתשלום מאובטח:`:"ההזמנה מוכנה. עכשיו לתשלום מאובטח:"):order.payment_method==="cash"?(order.order_no?`הזמנה ${order.order_no} נקלטה. התשלום במזומן ${order.delivery==="ship"?"במסירה":"באיסוף"}.`:"ההזמנה מוכנה."):(order.order_no?`הזמנה ${order.order_no} נקלטה.`:"ההזמנה מוכנה.");
-    setDone({head,text:orderText(order),url,total:order.total});announce(head);if(saved)setCart({});
+    setDone({head,text:orderText(order),url,total:order.total,payErr});announce(head);if(saved)setCart({});
+    if(url&&order.payment_method==="card"&&url!=="#"){ setTimeout(()=>{ location.href=url; },900); }
   };
   const copy=()=>navigator.clipboard.writeText(done.text).then(()=>toast("הועתק")).catch(()=>toast("סמנו והעתיקו ידנית"));
   return html`<div class="drawer" onClick=${e=>{if(e.target.classList.contains("drawer"))close()}}><div class="panel" ref=${panel} role="dialog" aria-modal="true" aria-labelledby="cT" onKeyDown=${trap}>
@@ -298,7 +306,7 @@ function Cart({S,P,cart,setCart,close,toast,announce,showNotice}){
       <p class="terms-note">בלחיצה על "שליחת הזמנה" אני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">התקנון ומדיניות הביטול</a>.</p>
       <button class="submit" type="submit" disabled=${busy}>${busy?"שולח…":"שליחת הזמנה"}</button></form>`}
     ${done&&html`<div class="done"><b>${done.head}</b><pre>${done.text}</pre>
-      ${done.url?html`<a class="paybtn" href=${done.url}>תשלום מאובטח בכרטיס אשראי ${ils(done.total)}</a>`:html`<a class="paybtn" href="#" aria-disabled="true">תשלום מאובטח בכרטיס אשראי – יופעל בקרוב</a>`}
+      ${done.url?html`<a class="paybtn" href=${done.url}>תשלום מאובטח בכרטיס אשראי ${ils(done.total)}</a><small class="muted" style=${{textAlign:"center"}}>מעבירים אותך לדף התשלום המאובטח…</small>`:done.payErr?html`<div class="banner" style=${{borderRadius:"12px"}}>${done.payErr}</div>`:html`<a class="paybtn" href="#" aria-disabled="true">תשלום מאובטח בכרטיס אשראי – יופעל בקרוב</a>`}
       <button class="cp" type="button" onClick=${copy}>העתקת פרטי ההזמנה</button><small>מספר להזמנות: <span dir="ltr">+${S.whatsapp}</span></small></div>`}
   </div></div>`;
 }

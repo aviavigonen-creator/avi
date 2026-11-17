@@ -194,12 +194,12 @@ pre.items{white-space:pre-wrap;margin:0;font:inherit;font-size:.9rem;color:var(-
       <form class="box" id="payForm"><h2>תשלום <button class="btn sm" type="submit">שמירה</button></h2>
         <div class="form">
           <label class="chk full"><input type="checkbox" name="pay_card_enabled"> להפעיל תשלום בכרטיס אשראי <small class="muted">(כבוי: האפשרות מוצגת ללקוח כ"יופעל בקרוב")</small></label>
-          <label>ספק סליקה<select name="pay_provider"><option value="none">לא מוגדר</option><option value="tranzila">Tranzila (דף תשלום ישיר)</option><option value="link">דף תשלום של חברת הסליקה (קישור עם סכום)</option></select></label>
+          <label>ספק סליקה<select name="pay_provider"><option value="none">לא מוגדר</option><option value="payplus">PayPlus (דף תשלום מאובטח, אימות אוטומטי)</option><option value="tranzila">Tranzila (דף תשלום ישיר)</option><option value="link">דף תשלום של חברת הסליקה (קישור עם סכום)</option></select></label>
           <label>שם מסוף Tranzila<input name="pay_terminal" dir="ltr"></label>
           <label class="full">תבנית קישור תשלום<input name="pay_link_template" dir="ltr" placeholder="https://pay.example.com/abc?sum={sum}&desc={order}"><small class="muted">משתנים: {sum} סכום · {order} מס' הזמנה · {name} שם · {phone} טלפון</small></label>
           <label class="chk"><input type="checkbox" name="pay_cash_enabled"> מזומן באיסוף/במסירה</label>
         </div>
-        <p class="muted" style="margin:12px 0 0">לספקים שדורשים חיבור שרת (Cardcom, PayPlus, Meshulam API) יש להוסיף Edge Function. תגידו ל-Claude איזה ספק בחרתם והוא יוסיף אותו.</p>
+        <p class="muted" style="margin:12px 0 0">PayPlus: המפתחות (API/Secret/Page UID) שמורים בצד השרת (Supabase Secrets), לא כאן. תשלום שמאושר מעדכן את ההזמנה ל"שולם" אוטומטית.</p>
       </form>
       <form class="box" id="chatForm"><h2>צ'אט ואנליטיקה <button class="btn sm" type="submit">שמירה</button></h2>
         <div class="form">
