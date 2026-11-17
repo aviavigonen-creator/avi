@@ -21,8 +21,7 @@ returns json language sql security definer as $$
     'top_products',     (select coalesce(json_agg(t), '[]'::json) from (
                            select i->>'name' as name, sum((i->>'qty')::int) as qty
                              from orders, jsonb_array_elements(items) i
-                             where deleted_at is null
-                            where created_at > now() - make_interval(days => days) and status not in ('cancelled','rejected')
+                            where deleted_at is null and created_at > now() - make_interval(days => days) and status not in ('cancelled','rejected')
                             group by 1 order by 2 desc limit 5) t)
   );
 $$;
