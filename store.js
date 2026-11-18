@@ -217,9 +217,12 @@ function Callback({S,close,toast,announce}){
 }
 
 function ProductModal({p,add,close}){
-  const m=media(p);const ref=useRef(null);useEffect(()=>{ref.current?.focus()},[]);
+  const m=media(p);const ref=useRef(null);useEffect(()=>{ref.current?.focus()},[]);const [side,setSide]=useState(1);
   return html`<div class="modal" onClick=${e=>{if(e.target.classList.contains("modal"))close()}}><div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="pmT">
-    ${m.video?html`<video class="pm-img" src=${m.video} poster=${m.poster} muted autoplay loop playsinline style=${{borderRadius:"14px"}} aria-label=${p.name}></video>`:m.img?html`<img class="pm-img" src=${m.img} alt=${p.name}/>`:null}
+    <div class="pm-media">
+      ${m.video?html`<video class="pm-img" src=${m.video} poster=${m.poster} muted autoplay loop playsinline style=${{borderRadius:"14px"}} aria-label=${p.name}></video>`:m.img?html`<img class="pm-img" src=${side===2&&m.img2?m.img2:m.img} alt=${`${p.name}${m.img2?(side===2?" – צד ב":" – צד א"):""}`}/>`:null}
+      ${m.img2&&html`<div class="sides pm-sides" role="group" aria-label="צד"><button type="button" aria-pressed=${side===1} onClick=${()=>setSide(1)}>צד א</button><button type="button" aria-pressed=${side===2} onClick=${()=>setSide(2)}>צד ב</button></div>`}
+    </div>
     <h2 id="pmT">${p.name}</h2>
     <ul class="pm-list">${(p.items||[]).map((i,k)=>html`<li key=${k}>${i}</li>`)}</ul>
     <div class="price" style=${{fontSize:"1.5rem"}}>${ils(p.price)}</div>
