@@ -38,14 +38,16 @@ Deno.serve(async (req) => {
     const r = p.record;
     let text = "";
     if (p.table === "callbacks") {
-      text = `📞 *בקשה לחזור ללקוח*\n` +
-        `שם: ${r.name}\n` +
-        `טלפון: ${r.phone}\n` +
-        (r.message ? `הודעה: ${r.message}\n` : "") +
-        `מקור: ${r.source === "site" ? "האתר" : r.source}\n` +
-        `זמן: ${il(r.created_at)}\n` +
-        `לחיוג: https://wa.me/${r.phone.replace(/\D/g, "").replace(/^0/, "972")}\n` +
-        `לפאנל: ${SITE}admin.html`;
+      // סיכום הפנייה: נושא + מה הלקוח כתב
+      const raw = String(r.message ?? "");
+      const topic = (raw.match(/^נושא:\s*(.+)$/m)?.[1] ?? "").trim();
+      const body = raw.replace(/^נושא:.*$/m, "").trim();
+      const src = ({ chat: "צ'אט האתר", site: "טופס באתר" } as Record<string, string>)[r.source] ?? r.source;
+      text = `💬 *יש פנייה חדשה ב${src}*\n\n` +
+        `*סיכום:* ${r.name} ${topic ? `פנה/תה בנושא "${topic}"` : "השאיר/ה פנייה"}${body ? ` וביקש/ה: ${body}` : ""}\n\n` +
+        `👤 ${r.name}\n📱 ${r.phone}\n🕒 ${il(r.created_at)}\n` +
+        `לשיחה איתו/ה: https://wa.me/${String(r.phone).replace(/\D/g, "").replace(/^0/, "972")}\n` +
+        `לפאנל: ${SITE}admin.html#callbacks`;
     } else if (p.table === "orders") {
       const items = (r.items ?? []).map((i: any) => `• ${i.name} × ${i.qty}`).join("\n");
       const pay = ({ card: "אשראי", cash: "מזומן", whatsapp: "לסיכום בוואטסאפ" } as Record<string, string>)[r.payment_method] ?? r.payment_method;

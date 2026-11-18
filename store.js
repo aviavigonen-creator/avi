@@ -159,7 +159,7 @@ function App(){
       <nav aria-label="קישורים"><h3>מידע</h3><a href="#shop">כל המארזים</a><a href="#tiers">הנחות כמות</a><a href="#accessibility">הצהרת נגישות</a><a href="terms.html">תקנון ומדיניות ביטול</a><a href="terms.html#privacy">מדיניות פרטיות</a><a href=${wa} target="_blank" rel="noopener">צרו קשר</a></nav>
     </div><div class="copy">© ${new Date().getFullYear()} ${S.store_name} · כל הזכויות שמורות</div></footer>
 
-    <a class="wa-float" href=${wa} target="_blank" rel="noopener" aria-label="צ'אט בוואטסאפ" hidden=${!!S.tawk_id}>${I.wa}</a>
+    <button class="wa-float" type="button" onClick=${()=>setCb(true)} aria-label="צ'אט עם החנות" aria-haspopup="dialog" hidden=${!!S.tawk_id}>${I.wa}</button>
     <button class="a11y-btn" type="button" aria-label="פתיחת תפריט נגישות" aria-expanded=${a11yOpen} onClick=${()=>setA11yOpen(o=>!o)}>${I.a11y}</button>
     ${a11yOpen&&html`<${A11yMenu} a11y=${a11y} setA11y=${setA11y} close=${()=>setA11yOpen(false)} announce=${announce}/>`}
     ${open&&html`<${Cart} S=${S} P=${P} cart=${cart} setCart=${setCart} close=${()=>setOpen(false)} toast=${toast} announce=${announce} showNotice=${showNotice}/>`}
@@ -185,26 +185,34 @@ function Grid({items,add,view,sides,setSides}){
 }
 
 function Callback({S,close,toast,announce}){
-  const [f,setF]=useState({name:"",phone:"",message:""});const [busy,setBusy]=useState(false);const [done,setDone]=useState(false);
-  const ref=useRef(null);useEffect(()=>{ref.current?.focus()},[]);
-  const set=k=>e=>setF(o=>({...o,[k]:e.target.value}));
-  const submit=async e=>{e.preventDefault();const name=f.name.trim(),phone=f.phone.replace(/[^\d+]/g,"");
-    if(!name||phone.length<9){toast("נא למלא שם וטלפון תקין");return}
-    setBusy(true);let ok=false;
-    if(DB_ON){try{const {error}=await sb.from("callbacks").insert({name,phone,message:f.message.trim()||null,source:"site",visitor_id:visitorId()});ok=!error;if(error)console.warn(error)}catch(e){}}
-    setBusy(false);setDone(true);announce("הבקשה נשלחה. נחזור אליך בהקדם.");
-    if(!ok){/* גיבוי: פתיחת וואטסאפ עם הפרטים */ window.open(`https://wa.me/${S.whatsapp}?text=${encodeURIComponent(`שלום, אשמח שתחזרו אליי.\nשם: ${name}\nטלפון: ${phone}${f.message.trim()?`\n${f.message.trim()}`:""}`)}`,"_blank");}
+  const TOPICS=["הזמנה גדולה / למוסד","שאלה על מוצר","משלוח וזמני אספקה","אחר"];
+  const [step,setStep]=useState(0);const [topic,setTopic]=useState("");const [text,setText]=useState("");const [name,setName]=useState("");const [phone,setPhone]=useState("");
+  const [input,setInput]=useState("");const [busy,setBusy]=useState(false);const [msgs,setMsgs]=useState([{who:"bot",t:`שלום! 👋 הגעתם לצ'אט של ${S.store_name}. במה אפשר לעזור?`}]);
+  const inRef=useRef(null),endRef=useRef(null);
+  useEffect(()=>{endRef.current?.scrollIntoView({block:"end"});if(step>0&&step<4)inRef.current?.focus()},[msgs,step]);
+  const bot=t=>setMsgs(m=>[...m,{who:"bot",t}]);const me=t=>setMsgs(m=>[...m,{who:"me",t}]);
+  const pick=t=>{setTopic(t);me(t);setStep(1);setTimeout(()=>bot("ספרו לי בקצרה מה תרצו – כמות, אירוע, תאריך, או כל שאלה."),250)};
+  const send=async e=>{e.preventDefault();const v=input.trim();if(!v)return;
+    if(step===1){setText(v);me(v);setInput("");setStep(2);setTimeout(()=>bot("איך קוראים לכם?"),250);return}
+    if(step===2){if(v.length<2){toast("נא להזין שם");return}setName(v);me(v);setInput("");setStep(3);setTimeout(()=>bot("ומה מספר הטלפון לחזרה?"),250);return}
+    if(step===3){const ph=v.replace(/[^\d+]/g,"");if(ph.length<9){toast("נא להזין מספר טלפון תקין");return}setPhone(ph);me(ph);setInput("");setBusy(true);
+      const message=`נושא: ${topic}\n${text}`;let ok=false;
+      if(DB_ON){try{const {error}=await sb.from("callbacks").insert({name,phone:ph,message,source:"chat",visitor_id:visitorId()});ok=!error;if(error)console.warn(error)}catch(err){}}
+      setBusy(false);setStep(4);bot(ok?`תודה ${name}! העברתי את הפנייה לצוות שלנו ונחזור אליך בהקדם למספר ${ph}. אפשר גם להמשיך איתנו ישירות בוואטסאפ 👇`:`תודה ${name}! לא הצלחתי לשמור את הפנייה כרגע – לחצו על הכפתור להמשך בוואטסאפ ונטפל מיד.`);
+      announce("הפנייה נשלחה. נחזור אליך בהקדם.");}
   };
-  return html`<div class="modal" onClick=${e=>{if(e.target.classList.contains("modal"))close()}}><div class="modal-in" role="dialog" aria-modal="true" aria-labelledby="cbT" style=${{textAlign:"right"}}>
-    <h2 id="cbT" style=${{textAlign:"center"}}>${done?"קיבלנו!":"רוצים שנחזור אליכם?"}</h2>
-    ${done?html`<p style=${{textAlign:"center"}}>תודה ${f.name.trim()}, נחזור אליך בהקדם למספר <span dir="ltr">${f.phone}</span>.</p><div class="modal-actions"><button class="submit" type="button" onClick=${close}>סגירה</button></div>`
-    :html`<p style=${{textAlign:"center",color:"var(--muted)",fontSize:".95rem"}}>השאירו פרטים ונחזור אליכם בהקדם, בוואטסאפ או בטלפון.</p>
-    <form onSubmit=${submit} noValidate>
-      <label>שם<input ref=${ref} value=${f.name} onInput=${set("name")} required autocomplete="name"/></label>
-      <label>טלפון<input value=${f.phone} onInput=${set("phone")} required type="tel" inputmode="tel" autocomplete="tel"/></label>
-      <label>במה נוכל לעזור? (לא חובה)<textarea rows="3" value=${f.message} onInput=${set("message")} placeholder="למשל: הזמנה של 40 מארזים לבית הכנסת"></textarea></label>
-      <button class="submit" type="submit" disabled=${busy}>${busy?"שולח…":"שלחו לי הודעה"}</button>
-      <button class="x-text" type="button" onClick=${close}>ביטול</button></form>`}
+  const waText=encodeURIComponent(`שלום, פניתי דרך הצ'אט באתר.\nשם: ${name}\nטלפון: ${phone}\nנושא: ${topic}\n${text}`);
+  return html`<div class="modal" onClick=${e=>{if(e.target.classList.contains("modal"))close()}}><div class="modal-in chat" role="dialog" aria-modal="true" aria-labelledby="chT">
+    <div class="chat-head"><span class="chat-dot" aria-hidden="true"></span><h2 id="chT">צ'אט עם ${S.store_name}</h2><button class="x" type="button" onClick=${close} aria-label="סגירה">×</button></div>
+    <div class="chat-log" role="log" aria-live="polite">
+      ${msgs.map((m,i)=>html`<div key=${i} class=${"bub "+m.who}>${m.t}</div>`)}
+      ${step===0&&html`<div class="chips">${TOPICS.map(t=>html`<button key=${t} type="button" class="chip" onClick=${()=>pick(t)}>${t}</button>`)}</div>`}
+      ${step===4&&html`<div class="modal-actions"><a class="submit" href=${`https://wa.me/${S.whatsapp}?text=${waText}`} target="_blank" rel="noopener">להמשיך בוואטסאפ</a><button class="x-text" type="button" onClick=${close}>סגירה</button></div>`}
+      <div ref=${endRef}></div>
+    </div>
+    ${step>0&&step<4&&html`<form class="chat-in" onSubmit=${send}>
+      <input ref=${inRef} value=${input} onInput=${e=>setInput(e.target.value)} placeholder=${step===1?"כתבו כאן…":step===2?"השם שלכם":"05X-XXXXXXX"} type=${step===3?"tel":"text"} inputmode=${step===3?"tel":"text"} autocomplete=${step===2?"name":step===3?"tel":"off"} aria-label="הודעה" disabled=${busy}/>
+      <button class="submit" type="submit" disabled=${busy}>${busy?"…":"שליחה"}</button></form>`}
   </div></div>`;
 }
 

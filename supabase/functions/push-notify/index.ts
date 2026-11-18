@@ -28,7 +28,9 @@ Deno.serve(async (req) => {
       payload = { title: `${r.payment_method === "card" ? "💳 הזמנה שולמה" : "🛒 הזמנה חדשה"} ${r.order_no} · ${ils(r.total)}`, body: `${r.customer_name} · ${r.phone} · ${n} מארזים · ${r.delivery === "ship" ? "משלוח" : "איסוף"}${r.note ? " · " + r.note : ""}`, tag: "order-" + r.id, url: SITE + "admin.html#orders" };
     } else if (p.table === "callbacks") {
       if (p.type !== "INSERT") return new Response("skip");
-      payload = { title: `📞 ${r.name} מבקש/ת שיחזרו אליו`, body: `${r.phone}${r.message ? " · " + r.message : ""}`, tag: "cb-" + r.id, url: SITE + "admin.html#callbacks" };
+      const topic = String(r.message ?? "").match(/^נושא:\s*(.+)$/m)?.[1] ?? "";
+      const body = String(r.message ?? "").replace(/^נושא:.*$/m, "").trim();
+      payload = { title: `💬 פנייה חדשה ב${r.source === "chat" ? "צ'אט האתר" : "אתר"} – ${r.name}`, body: `${topic ? topic + " · " : ""}${body || r.phone}`, tag: "cb-" + r.id, url: SITE + "admin.html#callbacks" };
     } else return new Response("skip");
 
     const { data: subs } = await sb.from("push_subscriptions").select("id,endpoint,keys");
